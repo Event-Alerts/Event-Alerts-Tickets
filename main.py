@@ -1,4 +1,21 @@
-# imports
+#Copyright (C) 2024  QWERTZexe
+
+#This program is free software: you can redistribute it and/or modify
+#it under the terms of the GNU Affero General Public License as published
+#by the Free Software Foundation, either version 3 of the License, or
+#any later version.
+#
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#GNU Affero General Public License for more details.
+#
+#You should have received a copy of the GNU Affero General Public License
+#along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+######################################################
+
+# IMPORTS
 import os
 import sys
 import requests
@@ -22,19 +39,24 @@ cwd = os.path.dirname(os.path.abspath(sys.argv[0]))
 ### CONSTS
 if not os.path.exists(f"{cwd}/config.json"):
     with open(f"{cwd}/config.json", "w") as f:
-        json.dump({"token":"YOUR_TOKEN"}, f)
+        json.dump({"TOKEN":"YOUR_TOKEN","SERVER_ID":"YOUR_SERVER_ID",
+                   "STORAGE_SERVER_ID":"YOUR_STORAGE_SERVER_ID","STORAGE_CHANNEL_ID":"YOUR_STORAGE_CHANNEL_ID",
+                   "MOD_ROLE_ID":"YOUR_MOD_ROLE_ID","TRANSCRIPT_CHNL_ID":"YOUR_TRANSCRIPT_CHNL_ID",
+                   "TICKET_CTGRY_ID":"YOUR_TICKET_CTGRY_ID","PING_ROLE":"YOUR_PING_ROLE",
+                   "LOG_CHNL_ID":"YOUR_LOG_CHNL_ID"}, f)
 
-SERVER_ID = 1012377516473843733
-STORAGE_SERVER_ID = 1267527824189689856
-STORAGE_CHANNEL_ID = 1267585336784191520
-MOD_ROLE_ID = 1142551455404920873
-TRANSCRIPT_CHNL_ID = 1268705453500534785
-TICKET_CTGRY_ID = 1268707192693985363
 
 with open(f"{cwd}/config.json", "r") as f:
     config = json.load(f)
-    TOKEN = config["token"]
-
+    TOKEN = config["TOKEN"]
+    SERVER_ID = int(config["SERVER_ID"])
+    STORAGE_SERVER_ID = int(config["STORAGE_SERVER_ID"])
+    STORAGE_CHANNEL_ID = int(config["STORAGE_CHANNEL_ID"])
+    MOD_ROLE_ID = int(config["MOD_ROLE_ID"])
+    TRANSCRIPT_CHNL_ID = int(config["TRANSCRIPT_CHNL_ID"])
+    TICKET_CTGRY_ID = int(config["TICKET_CTGRY_ID"])
+    PING_ROLE = int(config["PING_ROLE"])
+    LOG_CHNL_ID = int(config["LOG_CHNL_ID"])
 ### SETUP
 intents = discord.Intents.all()
 activity = discord.Activity(type=discord.ActivityType.listening, name="Oink! Oink!")
