@@ -62,7 +62,6 @@ client = discord.AutoShardedClient(shard_count=1, intents=intents, activity=acti
 tree = app_commands.CommandTree(client)
 
 # MAIN
-
 def get_discord_member_count(invite_url):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
@@ -72,17 +71,17 @@ def get_discord_member_count(invite_url):
     elif invite_url.startswith("discord.com/") or invite_url.startswith("discord.gg/"):
         response = requests.get(f"https://{invite_url}", headers=headers)
     elif invite_url.startswith(".gg/"):
-        response = requests.get(f"https://discord{invite_url}", headers=headers)   
+        response = requests.get(f"https://discord{invite_url}", headers=headers)
     elif invite_url.startswith("gg/"):
-        response = requests.get(f"https://discord.{invite_url}", headers=headers)   
+        response = requests.get(f"https://discord.{invite_url}", headers=headers)
     else:
-        response = requests.get(f"https://discord.gg/{invite_url}", headers=headers)   
+        response = requests.get(f"https://discord.gg/{invite_url}", headers=headers)
     if response.status_code != 200:
         print(f"Failed to retrieve data: {response.status_code}")
         return None
-    
+
     soup = BeautifulSoup(response.text, 'html.parser')
-    
+
     # Extract member count from the HTML
     member_count_element = soup.find('meta', property='og:description')
     if member_count_element:
@@ -92,6 +91,7 @@ def get_discord_member_count(invite_url):
     else:
         print("Member count element not found in the page.")
         return None
+
 
 def extract_member_count(description):
     try:
@@ -104,18 +104,20 @@ def extract_member_count(description):
         print(f"Error extracting member count: {e}")
         return None
 
+
 def parse_time(time_str):
     if not time_str:
         return 10  # Default to 10 seconds
-    
+
     units = {"s": 1, "m": 60, "h": 3600, "d": 86400}
     match = re.match(r"(\d+)([smhd])?$", time_str.lower())
-    
+
     if not match:
         return 10  # Default to 10 seconds if invalid format
-    
+
     value, unit = match.groups()
     return int(value) * units.get(unit, 1)
+
 
 async def close_ticket(channel, user):
     storage_guild = await client.fetch_guild(STORAGE_SERVER_ID)
