@@ -1,17 +1,17 @@
-#Copyright (C) 2024  QWERTZexe
+# Copyright (C) 2024  QWERTZexe
 
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published
-#by the Free Software Foundation, either version 3 of the License, or
-#any later version.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# any later version.
 #
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#GNU Affero General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ######################################################
 
@@ -21,8 +21,6 @@ import sys
 import requests
 import discord
 import json
-from operator import itemgetter
-from discord.ext import commands
 from discord.utils import get
 import mimetypes
 import asyncio
@@ -30,20 +28,19 @@ from bs4 import BeautifulSoup
 import re
 import io
 import html
-from discord.ext import tasks
 from discord import app_commands
 
-### THE HOLY CWD
+# THE HOLY CWD
 cwd = os.path.dirname(os.path.abspath(sys.argv[0]))
 
-### CONSTS
+# CONSTS
 if not os.path.exists(f"{cwd}/config.json"):
     with open(f"{cwd}/config.json", "w") as f:
-        json.dump({"TOKEN":"YOUR_TOKEN","SERVER_ID":"YOUR_SERVER_ID",
-                   "STORAGE_SERVER_ID":"YOUR_STORAGE_SERVER_ID","STORAGE_CHANNEL_ID":"YOUR_STORAGE_CHANNEL_ID",
-                   "MOD_ROLE_ID":"YOUR_MOD_ROLE_ID","TRANSCRIPT_CHNL_ID":"YOUR_TRANSCRIPT_CHNL_ID",
-                   "TICKET_CTGRY_ID":"YOUR_TICKET_CTGRY_ID","PING_ROLE":"YOUR_PING_ROLE",
-                   "LOG_CHNL_ID":"YOUR_LOG_CHNL_ID"}, f)
+        json.dump({"TOKEN": "YOUR_TOKEN", "SERVER_ID": "YOUR_SERVER_ID",
+                   "STORAGE_SERVER_ID": "YOUR_STORAGE_SERVER_ID", "STORAGE_CHANNEL_ID": "YOUR_STORAGE_CHANNEL_ID",
+                   "MOD_ROLE_ID": "YOUR_MOD_ROLE_ID", "TRANSCRIPT_CHNL_ID": "YOUR_TRANSCRIPT_CHNL_ID",
+                   "TICKET_CTGRY_ID": "YOUR_TICKET_CTGRY_ID", "PING_ROLE": "YOUR_PING_ROLE",
+                   "LOG_CHNL_ID": "YOUR_LOG_CHNL_ID"}, f)
 
 
 with open(f"{cwd}/config.json", "r") as f:
@@ -57,13 +54,14 @@ with open(f"{cwd}/config.json", "r") as f:
     TICKET_CTGRY_ID = int(config["TICKET_CTGRY_ID"])
     PING_ROLE = int(config["PING_ROLE"])
     LOG_CHNL_ID = int(config["LOG_CHNL_ID"])
-### SETUP
+
+# SETUP
 intents = discord.Intents.all()
 activity = discord.Activity(type=discord.ActivityType.listening, name="Oink! Oink!")
-client = discord.AutoShardedClient(shard_count=1,intents=intents, activity=activity)
+client = discord.AutoShardedClient(shard_count=1, intents=intents, activity=activity)
 tree = app_commands.CommandTree(client)
 
-### MAIN
+# MAIN
 
 def get_discord_member_count(invite_url):
     headers = {
@@ -575,12 +573,13 @@ async def remove(interaction: discord.Interaction, member: discord.Member):
         await log_channel.send(f"<@{str(interaction.user.id)}> Just REMOVED {member.mention} from a ticket opened by: <@{str(interaction.channel.topic.split('-')[-1])}> ({interaction.channel.mention})")
     else:
         await interaction.followup.send(f"Sorry, this command is only for staff!", ephemeral=True)
-### ADDING COMMANDS
+        
+# ADDING COMMANDS
 tree.add_command(ticketmsg)
 tree.add_command(close)
 tree.add_command(priority)
 tree.add_command(add)
 tree.add_command(remove)
 
-### RUNNING
+# RUNNING
 client.run(TOKEN)
