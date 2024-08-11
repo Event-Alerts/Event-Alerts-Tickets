@@ -119,7 +119,7 @@ def parse_time(time_str):
     value, unit = match.groups()
     return int(value) * units.get(unit, 1)
 
-async def close_ticket(channel):
+async def close_ticket(channel, user):
     storage_guild = await client.fetch_guild(STORAGE_SERVER_ID)
     storage_channel = await storage_guild.fetch_channel(STORAGE_CHANNEL_ID)
 
@@ -264,7 +264,8 @@ async def close_ticket(channel):
 
     transcript_channel = channel.guild.get_channel(TRANSCRIPT_CHNL_ID)
     await transcript_channel.send(embed=discord.Embed(description=f"Transcripts for {channel.name}", color=discord.Color.blue()), files=[markdown_file, html_file])
-
+    log_channel = client.get_channel(LOG_CHNL_ID)
+    await log_channel.send(f"<@{str(user.id)}> Just closed a ticket opened by: <@{str(channel.topic.split('-')[-1])}>")
     # Close the ticket
     await channel.delete()
 
@@ -275,7 +276,6 @@ def format_embed_markdown(embed):
     if embed.footer:
         md += f"\n*{embed.footer.text}*"
     return md
-
 def format_embed_html(embed):
     embed_html = '<div class="embed">'
     if embed.title:
@@ -317,7 +317,7 @@ async def create_partner_ticket(username: str, servername: str, members: str | i
     await channel.set_permissions(mod_role, read_messages=True, send_messages=True)
     em=discord.Embed(title=f"Partner Application - {servername}", description=f"Hello {username}! Your application ticket has been created!\n\n**__Information:__**\n**Servername:** ``{servername}``\n**Members:** ``{str(members)}``\n**Invite:** ``{invite}``\n**Partner reason:** ``{reason}``",color=discord.Color.yellow())
     em.set_footer(text="EVENT ALERTS - TICKETS",icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
-    await channel.send(content=f"<@{str(memberid)}>",embed=em,view=CloseTicketView())
+    await channel.send(content=f"<@{str(memberid)}>\n<@&{str(PING_ROLE)}>",embed=em,view=CloseTicketView())
     return str(channel.id)
 async def create_ticket(username: str, memberid: int, reason: str) -> str:
     guild = await client.fetch_guild(SERVER_ID)
@@ -337,7 +337,9 @@ async def create_ticket(username: str, memberid: int, reason: str) -> str:
     await channel.set_permissions(mod_role, read_messages=True, send_messages=True)
     em=discord.Embed(title=f"Ticket - {username}", description=f"Hello {username}! Your ticket has been created!\n\n**__Information:__**\n**Ticket Reason:** ``{reason}``",color=discord.Color.yellow())
     em.set_footer(text="EVENT ALERTS - TICKETS",icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
-    await channel.send(content=f"<@{str(memberid)}>",embed=em,view=CloseTicketView())
+    await channel.send(content=f"<@{str(memberid)}>\n<@&{str(PING_ROLE)}>",embed=em,view=CloseTicketView())
+    log_channel = client.get_channel(LOG_CHNL_ID)
+    await log_channel.send(f"<@{str(memberid)}> Just opened a ticket!\n<#{str(channel.id)}>")
     return str(channel.id)
 class CloseTicketView(discord.ui.View):
     def __init__(self):
@@ -361,7 +363,7 @@ class CloseTicketView(discord.ui.View):
             await asyncio.wait_for(view.wait(), timeout=10)
         except asyncio.TimeoutError:
             if not view.cancelled:
-                await close_ticket(interaction.channel)
+                await close_ticket(interaction.channel, interaction.user)
 class PartnerInfo(discord.ui.Modal, title='PARTNER INFORMATION'):
     
     servername = discord.ui.TextInput(
@@ -513,7 +515,7 @@ async def close(interaction: discord.Interaction, time: str = None):
         await asyncio.wait_for(view.wait(), timeout=seconds)
     except asyncio.TimeoutError:
         if not view.cancelled:
-            await close_ticket(interaction.channel)
+            await close_ticket(interaction.channel, interaction.user)
 @app_commands.command(description="STAFF ONLY | Change the priority of the current ticket")
 @app_commands.describe(priority="The priority of the current ticket")
 @app_commands.choices(priority=[
@@ -537,11 +539,48 @@ async def priority(interaction: discord.Interaction, priority: app_commands.Choi
         await interaction.followup.send(f"Successfully changed the ticket priority to {priority.name}!", ephemeral=True)
     else:
         await interaction.followup.send("Sorry, this command is only for staff!",ephemeral=True)
-
+@app_commands.command(description="STAFF ONLY | Add someone to the current ticket")
+@app_commands.describe(member="The member to add to the current ticket")
+async def add(interaction: discord.Interaction, member: discord.Member):
+    if "TICKET" not in interaction.channel.topic:
+        await interaction.response.send_message(embed=discord.Embed(description="This command can only be used in ticket channels.", color=discord.Color.red()), ephemeral=True)
+        return
+    await interaction.response.defer(thinking=True) 
+    
+    if get(interaction.user.roles, id=MOD_ROLE_ID) or interaction.user.id == 971316880243576862 or interaction.user.guild_permissions.administrator:
+        try:
+            await interaction.channel.set_permissions(member, read_messages=True, send_messages=True)
+        except:
+            pass
+        await interaction.followup.send(f"Successfully added {member.mention} to the ticket!")
+        log_channel = client.get_channel(LOG_CHNL_ID)
+        await log_channel.send(f"<@{str(interaction.user.id)}> Just ADDED {member.mention} from a ticket opened by: <@{str(interaction.channel.topic.split('-')[-1])}> ({interaction.channel.mention})")
+    else:
+        await interaction.followup.send(f"Sorry, this command is only for staff!", ephemeral=True)
+@app_commands.command(description="STAFF ONLY | Remove someone from the current ticket")
+@app_commands.describe(member="The member to remove from the current ticket")
+async def remove(interaction: discord.Interaction, member: discord.Member):
+    if "TICKET" not in interaction.channel.topic:
+        await interaction.response.send_message(embed=discord.Embed(description="This command can only be used in ticket channels.", color=discord.Color.red()), ephemeral=True)
+        return
+    await interaction.response.defer(thinking=True) 
+    
+    if get(interaction.user.roles, id=MOD_ROLE_ID) or interaction.user.id == 971316880243576862 or interaction.user.guild_permissions.administrator:
+        try:
+            await interaction.channel.set_permissions(member, read_messages=False, send_messages=False)
+        except:
+            pass
+        await interaction.followup.send(f"Successfully removed {member.mention} from the ticket!")
+        log_channel = client.get_channel(LOG_CHNL_ID)
+        await log_channel.send(f"<@{str(interaction.user.id)}> Just REMOVED {member.mention} from a ticket opened by: <@{str(interaction.channel.topic.split('-')[-1])}> ({interaction.channel.mention})")
+    else:
+        await interaction.followup.send(f"Sorry, this command is only for staff!", ephemeral=True)
 ### ADDING COMMANDS
 tree.add_command(ticketmsg)
 tree.add_command(close)
 tree.add_command(priority)
+tree.add_command(add)
+tree.add_command(remove)
 
 ### RUNNING
 client.run(TOKEN)
