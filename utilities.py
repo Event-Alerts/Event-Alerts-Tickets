@@ -38,11 +38,14 @@ def get_discord_member_count(invite_url):
     elif invite_url.startswith("discord.com/") or invite_url.startswith("discord.gg/"):
         response = requests.get(f"https://{invite_url}", headers=headers)
     elif invite_url.startswith(".gg/"):
-        response = requests.get(f"https://discord{invite_url}", headers=headers)
+        response = requests.get(
+            f"https://discord{invite_url}", headers=headers)
     elif invite_url.startswith("gg/"):
-        response = requests.get(f"https://discord.{invite_url}", headers=headers)
+        response = requests.get(
+            f"https://discord.{invite_url}", headers=headers)
     else:
-        response = requests.get(f"https://discord.gg/{invite_url}", headers=headers)
+        response = requests.get(
+            f"https://discord.gg/{invite_url}", headers=headers)
     if response.status_code != 200:
         print(f"Failed to retrieve data: {response.status_code}")
         return None
@@ -138,14 +141,14 @@ def get_config(key=None):
         return TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID
     else:
         return config[key]
-    
+
 
 async def create_partner_ticket(client: discord.Client, username: str, servername: str, members, memberid: int, invite: str, reason: str) -> str:
     TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID = get_config()
     print("A")
     guild = await client.fetch_guild(SERVER_ID)
     category: discord.CategoryChannel = await client.fetch_channel(TICKET_CTGRY_ID)
-    done_user = username.lower().replace(" ","-")
+    done_user = username.lower().replace(" ", "-")
     channel = await category.create_text_channel(name=f"🟡p-{done_user}")
     await channel.edit(topic=f"TICKET-{str(memberid)}")
     # Set up permissions
@@ -154,14 +157,16 @@ async def create_partner_ticket(client: discord.Client, username: str, servernam
     # Allow the ticket creator to see and write in the channel
     member = await guild.fetch_member(memberid)
     await channel.set_permissions(member, read_messages=True, send_messages=True)
-    
+
     # Allow users with the mod role to see and write in the channel
     mod_role = guild.get_role(MOD_ROLE_ID)
     await channel.set_permissions(mod_role, read_messages=True, send_messages=True)
-    em=discord.Embed(title=f"Partner Application - {servername}", description=f"Hello {username}! Your application ticket has been created!\n\n**__Information:__**\n**Servername:** ``{servername}``\n**Members:** ``{str(members)}``\n**Invite:** ``{invite}``\n**Partner reason:** ``{reason}``",color=discord.Color.yellow())
-    em.set_footer(text="EVENT ALERTS - TICKETS",icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
+    em = discord.Embed(title=f"Partner Application - {servername}",
+                       description=f"Hello {username}! Your application ticket has been created!\n\n**__Information:__**\n**Servername:** ``{servername}``\n**Members:** ``{str(members)}``\n**Invite:** ``{invite}``\n**Partner reason:** ``{reason}``", color=discord.Color.yellow())
+    em.set_footer(text="EVENT ALERTS - TICKETS",
+                  icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
     from CloseTicket import CloseTicket
-    await channel.send(content=f"<@{str(memberid)}>\n<@&{str(PING_ROLE)}>",embed=em,view=CloseTicket())
+    await channel.send(content=f"<@{str(memberid)}>\n<@&{str(PING_ROLE)}>", embed=em, view=CloseTicket())
     return str(channel.id)
 
 
@@ -306,8 +311,10 @@ async def close_ticket(client, channel, user):
         </body>
         </html>"""
 
-    markdown_file = discord.File(io.StringIO(markdown_transcript), filename=f"{channel.name}_transcript.md")
-    html_file = discord.File(io.StringIO(html_transcript), filename=f"{channel.name}_transcript.html")
+    markdown_file = discord.File(io.StringIO(
+        markdown_transcript), filename=f"{channel.name}_transcript.md")
+    html_file = discord.File(io.StringIO(
+        html_transcript), filename=f"{channel.name}_transcript.html")
 
     transcript_channel = channel.guild.get_channel(TRANSCRIPT_CHNL_ID)
     x = await transcript_channel.send(embed=discord.Embed(description=f"Transcripts for {channel.name}", color=discord.Color.blue()), files=[markdown_file, html_file])
@@ -321,23 +328,25 @@ async def create_ticket(client: discord.Client, username: str, memberid: int, re
     TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID = get_config()
     guild = await client.fetch_guild(SERVER_ID)
     category: discord.CategoryChannel = await client.fetch_channel(TICKET_CTGRY_ID)
-    done_user = username.lower().replace(" ","-")
+    done_user = username.lower().replace(" ", "-")
     channel = await category.create_text_channel(name=f"🟡t-{done_user}")
     await channel.edit(topic=f"TICKET-{str(memberid)}")
     # Set up permissions
     await channel.set_permissions(guild.default_role, read_messages=False, send_messages=False)
-    
+
     # Allow the ticket creator to see and write in the channel
     member = await guild.fetch_member(memberid)
     await channel.set_permissions(member, read_messages=True, send_messages=True)
-    
+
     # Allow users with the mod role to see and write in the channel
     mod_role = guild.get_role(MOD_ROLE_ID)
     await channel.set_permissions(mod_role, read_messages=True, send_messages=True)
-    em=discord.Embed(title=f"Ticket - {username}", description=f"Hello {username}! Your ticket has been created!\n\n**__Information:__**\n**Ticket Reason:** ``{reason}``",color=discord.Color.yellow())
-    em.set_footer(text="EVENT ALERTS - TICKETS",icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
+    em = discord.Embed(
+        title=f"Ticket - {username}", description=f"Hello {username}! Your ticket has been created!\n\n**__Information:__**\n**Ticket Reason:** ``{reason}``", color=discord.Color.yellow())
+    em.set_footer(text="EVENT ALERTS - TICKETS",
+                  icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
     from CloseTicket import CloseTicket
-    await channel.send(content=f"<@{str(memberid)}>\n<@&{str(PING_ROLE)}>",embed=em,view=CloseTicket())
+    await channel.send(content=f"<@{str(memberid)}>\n<@&{str(PING_ROLE)}>", embed=em, view=CloseTicket())
     log_channel = client.get_channel(LOG_CHNL_ID)
     await log_channel.send(f"<@{str(memberid)}> Just opened a ticket!\n<#{str(channel.id)}>")
     return str(channel.id)

@@ -45,4 +45,3 @@ class CloseTicket(discord.ui.View):
         except asyncio.TimeoutError:
             if not view.cancelled:
                 await utilities.close_ticket(interaction.client, interaction.channel, interaction.user)
-

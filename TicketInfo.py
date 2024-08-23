@@ -34,6 +34,7 @@ class TicketInfo(discord.ui.Modal, title='TICKET INFORMATION'):
         await interaction.response.send_message(f'**_Creating ticket channel..._**', ephemeral=True)
         cid = await utilities.create_ticket(client=interaction.client, username=interaction.user.name, memberid=interaction.user.id, reason=self.ticketreason)
         await interaction.edit_original_response(content=f'**_Done! -> <#{cid}>_**')
+
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         try:
             await interaction.response.send_message(f'**_Oops! Something went wrong._**', ephemeral=True)

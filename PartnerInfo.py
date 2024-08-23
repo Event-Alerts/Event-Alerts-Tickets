@@ -21,7 +21,7 @@ import utilities
 
 # PARTNERINFO.PY
 class PartnerInfo(discord.ui.Modal, title='PARTNER INFORMATION'):
-    
+
     servername = discord.ui.TextInput(
         label='Your servers name',
         placeholder='Oink events',
@@ -40,8 +40,7 @@ class PartnerInfo(discord.ui.Modal, title='PARTNER INFORMATION'):
         placeholder='https://discord.com/invite/yourserver',
         max_length=100,
         required=True
-        )
-
+    )
 
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.send_message(f'**_Creating ticket channel..._**', ephemeral=True)
@@ -50,11 +49,10 @@ class PartnerInfo(discord.ui.Modal, title='PARTNER INFORMATION'):
         except:
             member_count = None
         if member_count:
-            cid = await utilities.create_partner_ticket(client = interaction.client, username=interaction.user.name, servername=self.servername, members=member_count, memberid=interaction.user.id, invite=self.invite, reason=self.partnerreason)
+            cid = await utilities.create_partner_ticket(client=interaction.client, username=interaction.user.name, servername=self.servername, members=member_count, memberid=interaction.user.id, invite=self.invite, reason=self.partnerreason)
             await interaction.edit_original_response(content=f'**_Done! -> <#{cid}>_**')
         else:
             await interaction.edit_original_response(content='**_Error! Invalid invite link!_**')
-
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         try:

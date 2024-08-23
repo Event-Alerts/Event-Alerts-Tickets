@@ -23,31 +23,35 @@ import utilities
 
 # OPENVIEW.PY
 class OpenView(discord.ui.View):
-            def __init__(self):
-                super().__init__(timeout=None)
-            @discord.ui.button(label="APPLY FOR PARTNER", emoji="🤝", style=discord.ButtonStyle.blurple,custom_id="partner_button")
-            async def partner_button(self, interaction: discord.Interaction, button: discord.Button):
-                # Check for existing tickets
-                TICKET_CTGRY_ID = utilities.get_config("TICKET_CTGRY_ID")
-                category = interaction.guild.get_channel(TICKET_CTGRY_ID)
-                try:
-                    user_tickets = [channel for channel in category.text_channels if str(interaction.user.id) in channel.topic]
-                except:
-                    user_tickets = []
-                if len(user_tickets) >= 2:
-                    await interaction.response.send_message("You already have 2 open tickets. Please close an existing ticket before opening a new one.", ephemeral=True)
-                else:
-                    await interaction.response.send_modal(PartnerInfo())
-            @discord.ui.button(label="OPEN A SUPPORT TICKET", emoji="🎫", style=discord.ButtonStyle.gray, custom_id="ticket_button")
-            async def ticket_button(self, interaction: discord.Interaction, button: discord.Button):
-                # Check for existing tickets
-                TICKET_CTGRY_ID = utilities.get_config("TICKET_CTGRY_ID")
-                category = interaction.guild.get_channel(TICKET_CTGRY_ID)
-                try:
-                    user_tickets = [channel for channel in category.text_channels if str(interaction.user.id) in channel.topic]
-                except:
-                    user_tickets = []
-                if len(user_tickets) >= 2:
-                    await interaction.response.send_message("You already have 2 open tickets. Please close an existing ticket before opening a new one.", ephemeral=True)
-                else:
-                    await interaction.response.send_modal(TicketInfo())
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label="APPLY FOR PARTNER", emoji="🤝", style=discord.ButtonStyle.blurple, custom_id="partner_button")
+    async def partner_button(self, interaction: discord.Interaction, button: discord.Button):
+        # Check for existing tickets
+        TICKET_CTGRY_ID = utilities.get_config("TICKET_CTGRY_ID")
+        category = interaction.guild.get_channel(TICKET_CTGRY_ID)
+        try:
+            user_tickets = [channel for channel in category.text_channels if str(
+                interaction.user.id) in channel.topic]
+        except:
+            user_tickets = []
+        if len(user_tickets) >= 2:
+            await interaction.response.send_message("You already have 2 open tickets. Please close an existing ticket before opening a new one.", ephemeral=True)
+        else:
+            await interaction.response.send_modal(PartnerInfo())
+
+    @discord.ui.button(label="OPEN A SUPPORT TICKET", emoji="🎫", style=discord.ButtonStyle.gray, custom_id="ticket_button")
+    async def ticket_button(self, interaction: discord.Interaction, button: discord.Button):
+        # Check for existing tickets
+        TICKET_CTGRY_ID = utilities.get_config("TICKET_CTGRY_ID")
+        category = interaction.guild.get_channel(TICKET_CTGRY_ID)
+        try:
+            user_tickets = [channel for channel in category.text_channels if str(
+                interaction.user.id) in channel.topic]
+        except:
+            user_tickets = []
+        if len(user_tickets) >= 2:
+            await interaction.response.send_message("You already have 2 open tickets. Please close an existing ticket before opening a new one.", ephemeral=True)
+        else:
+            await interaction.response.send_modal(TicketInfo())
