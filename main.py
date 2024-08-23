@@ -177,17 +177,22 @@ async def bump(interaction: discord.Interaction):
     if "TICKET" not in interaction.channel.topic:
         await interaction.response.send_message(embed=discord.Embed(description="This command can only be used in ticket channels.", color=discord.Color.red()), ephemeral=True)
         return
-    await interaction.response.defer(thinking=True)
 
     if get(interaction.user.roles, id=MOD_ROLE_ID) or interaction.user.id == 971316880243576862 or interaction.user.guild_permissions.administrator:
+        await interaction.response.defer(thinking=True,ephemeral=True)
         try:
             member = interaction.channel.topic.split("-")[1]
             em = discord.Embed(title="Are you still here?",
                                description="We have received no feedback from your side recently", color=discord.Color.yellow())
             await interaction.channel.send(f"Hello <@{member}> :wave:", embed=em)
+            err = 0
         except:
-            pass
-        await interaction.followup.send(f"Successfully bumped the ticket!", ephemeral=True)
+            err = 1
+            await interaction.channel.send(f"Hello <@{member}> :wave:", embed=em)
+        if err == 0:
+            await interaction.followup.send(f"Successfully bumped the ticket!", ephemeral=True)
+        else:
+            await interaction.followup.send(f"**__ERROR__** bumping the ticket!", ephemeral=True)
     else:
         await interaction.followup.send(f"Sorry, this command is only for staff!", ephemeral=True)
 

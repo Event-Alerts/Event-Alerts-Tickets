@@ -157,6 +157,8 @@ async def create_partner_ticket(client: discord.Client, username: str, servernam
     # Allow the ticket creator to see and write in the channel
     member = await guild.fetch_member(memberid)
     await channel.set_permissions(member, read_messages=True, send_messages=True)
+    # Allow the bot too
+    await channel.set_permissions(guild.get_member(client.user.id), read_messages=True, send_messages=True)
 
     # Allow users with the mod role to see and write in the channel
     mod_role = guild.get_role(MOD_ROLE_ID)
@@ -333,11 +335,11 @@ async def create_ticket(client: discord.Client, username: str, memberid: int, re
     await channel.edit(topic=f"TICKET-{str(memberid)}")
     # Set up permissions
     await channel.set_permissions(guild.default_role, read_messages=False, send_messages=False)
-
     # Allow the ticket creator to see and write in the channel
     member = await guild.fetch_member(memberid)
     await channel.set_permissions(member, read_messages=True, send_messages=True)
-
+    # Allow the bot too
+    await channel.set_permissions(await guild.fetch_member(client.user.id), read_messages=True, send_messages=True)
     # Allow users with the mod role to see and write in the channel
     mod_role = guild.get_role(MOD_ROLE_ID)
     await channel.set_permissions(mod_role, read_messages=True, send_messages=True)
