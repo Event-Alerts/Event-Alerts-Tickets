@@ -140,7 +140,7 @@ def get_config(key=None):
         return config[key]
     
 
-async def create_partner_ticket(client: discord.Client, username: str, servername: str, members: str | int, memberid: int, invite: str, reason: str) -> str:
+async def create_partner_ticket(client: discord.Client, username: str, servername: str, members, memberid: int, invite: str, reason: str) -> str:
     TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID = get_config()
     print("A")
     guild = await client.fetch_guild(SERVER_ID)
