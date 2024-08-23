@@ -165,6 +165,24 @@ async def remove(interaction: discord.Interaction, member: discord.Member):
         await log_channel.send(f"<@{str(interaction.user.id)}> Just REMOVED {member.mention} from a ticket opened by: <@{str(interaction.channel.topic.split('-')[-1])}> ({interaction.channel.mention})")
     else:
         await interaction.followup.send(f"Sorry, this command is only for staff!", ephemeral=True)
+    
+@app_commands.command(description="STAFF ONLY | Bump the current ticket")
+async def bump(interaction: discord.Interaction):
+    if "TICKET" not in interaction.channel.topic:
+        await interaction.response.send_message(embed=discord.Embed(description="This command can only be used in ticket channels.", color=discord.Color.red()), ephemeral=True)
+        return
+    await interaction.response.defer(thinking=True) 
+    
+    if get(interaction.user.roles, id=MOD_ROLE_ID) or interaction.user.id == 971316880243576862 or interaction.user.guild_permissions.administrator:
+        try:
+            member = interaction.channel.topic.split("-")[1]
+            em = discord.Embed(title="Are you still here?", description="We have received no feedback from your side recently", color = discord.Color.yellow())
+            await interaction.channel.send(f"Hello <@{member}> :wave:",embed=em)
+        except:
+            pass
+        await interaction.followup.send(f"Successfully bumped the ticket!", ephemeral=True)
+    else:
+        await interaction.followup.send(f"Sorry, this command is only for staff!", ephemeral=True)
         
 # ADDING COMMANDS
 tree.add_command(ticketmsg)
@@ -172,6 +190,7 @@ tree.add_command(close)
 tree.add_command(priority)
 tree.add_command(add)
 tree.add_command(remove)
+tree.add_command(bump)
 
 # RUNNING
 client.run(TOKEN)
