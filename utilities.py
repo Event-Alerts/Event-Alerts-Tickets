@@ -137,14 +137,15 @@ def get_config(key=None):
         TICKET_CTGRY_ID = int(config["TICKET_CTGRY_ID"])
         PING_ROLE = int(config["PING_ROLE"])
         LOG_CHNL_ID = int(config["LOG_CHNL_ID"])
+        MUTED_ROLE_ID = int(config["MUTED_ROLE_ID"])
     if key == None:
-        return TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID
+        return TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID
     else:
         return config[key]
 
 
 async def create_partner_ticket(client: discord.Client, username: str, servername: str, members, memberid: int, invite: str, reason: str) -> str:
-    TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID = get_config()
+    TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID = get_config()
     print("A")
     guild = await client.fetch_guild(SERVER_ID)
     category: discord.CategoryChannel = await client.fetch_channel(TICKET_CTGRY_ID)
@@ -158,7 +159,9 @@ async def create_partner_ticket(client: discord.Client, username: str, servernam
     member = await guild.fetch_member(memberid)
     await channel.set_permissions(member, read_messages=True, send_messages=True)
     # Allow the bot too
-    await channel.set_permissions(guild.get_member(client.user.id), read_messages=True, send_messages=True)
+    await channel.set_permissions(await guild.fetch_member(client.user.id), read_messages=True, send_messages=True)
+    # Dont Allow muted role to use / cmds
+    await channel.set_permissions(guild.get_role(MUTED_ROLE_ID), use_application_commands=False)
 
     # Allow users with the mod role to see and write in the channel
     mod_role = guild.get_role(MOD_ROLE_ID)
@@ -173,7 +176,7 @@ async def create_partner_ticket(client: discord.Client, username: str, servernam
 
 
 async def close_ticket(client, channel, user):
-    TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID = get_config()
+    TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID = get_config()
     storage_guild = await client.fetch_guild(STORAGE_SERVER_ID)
     storage_channel = await storage_guild.fetch_channel(STORAGE_CHANNEL_ID)
 
@@ -327,7 +330,7 @@ async def close_ticket(client, channel, user):
 
 
 async def create_ticket(client: discord.Client, username: str, memberid: int, reason: str) -> str:
-    TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID = get_config()
+    TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID = get_config()
     guild = await client.fetch_guild(SERVER_ID)
     category: discord.CategoryChannel = await client.fetch_channel(TICKET_CTGRY_ID)
     done_user = username.lower().replace(" ", "-")
@@ -340,6 +343,8 @@ async def create_ticket(client: discord.Client, username: str, memberid: int, re
     await channel.set_permissions(member, read_messages=True, send_messages=True)
     # Allow the bot too
     await channel.set_permissions(await guild.fetch_member(client.user.id), read_messages=True, send_messages=True)
+    # Dont Allow muted role to use / cmds
+    await channel.set_permissions(guild.get_role(MUTED_ROLE_ID), use_application_commands=False)
     # Allow users with the mod role to see and write in the channel
     mod_role = guild.get_role(MOD_ROLE_ID)
     await channel.set_permissions(mod_role, read_messages=True, send_messages=True)
