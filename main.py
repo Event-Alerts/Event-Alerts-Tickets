@@ -125,9 +125,13 @@ async def priority(interaction: discord.Interaction, priority: app_commands.Choi
     if get(member.roles, id=MOD_ROLE_ID) or member.id == 971316880243576862 or interaction.user.guild_permissions.administrator:
         try:
             await interaction.channel.edit(name=f"{priority.value}{interaction.channel.name[1:]}")
+            err = 0
         except:
-            pass
-        await interaction.followup.send(f"Successfully changed the ticket priority to {priority.name}!", ephemeral=True)
+            err = 1
+        if err == 0:
+            await interaction.followup.send(f"Successfully changed the ticket priority to {priority.name}!", ephemeral=True)
+        else:
+            await interaction.followup.send(f"**__ERROR__** changing the ticket priority!", ephemeral=True)
     else:
         await interaction.followup.send("Sorry, this command is only for staff!", ephemeral=True)
 
@@ -143,11 +147,15 @@ async def add(interaction: discord.Interaction, member: discord.Member):
     if get(interaction.user.roles, id=MOD_ROLE_ID) or interaction.user.id == 971316880243576862 or interaction.user.guild_permissions.administrator:
         try:
             await interaction.channel.set_permissions(member, read_messages=True, send_messages=True)
+            err = 0
         except:
-            pass
-        await interaction.followup.send(f"Successfully added {member.mention} to the ticket!")
-        log_channel = client.get_channel(LOG_CHNL_ID)
-        await log_channel.send(f"<@{str(interaction.user.id)}> Just ADDED {member.mention} from a ticket opened by: <@{str(interaction.channel.topic.split('-')[-1])}> ({interaction.channel.mention})")
+            err = 1
+        if err == 0:
+            await interaction.followup.send(f"Successfully added {member.mention} to the ticket!")
+            log_channel = client.get_channel(LOG_CHNL_ID)
+            await log_channel.send(f"<@{str(interaction.user.id)}> Just ADDED {member.mention} from a ticket opened by: <@{str(interaction.channel.topic.split('-')[-1])}> ({interaction.channel.mention})")
+        else:
+            await interaction.followup.send(f"**__ERROR__** adding someone to the ticket!", ephemeral=True)
     else:
         await interaction.followup.send(f"Sorry, this command is only for staff!", ephemeral=True)
 
@@ -163,11 +171,15 @@ async def remove(interaction: discord.Interaction, member: discord.Member):
     if get(interaction.user.roles, id=MOD_ROLE_ID) or interaction.user.id == 971316880243576862 or interaction.user.guild_permissions.administrator:
         try:
             await interaction.channel.set_permissions(member, read_messages=False, send_messages=False)
+            err = 0
         except:
-            pass
-        await interaction.followup.send(f"Successfully removed {member.mention} from the ticket!")
-        log_channel = client.get_channel(LOG_CHNL_ID)
-        await log_channel.send(f"<@{str(interaction.user.id)}> Just REMOVED {member.mention} from a ticket opened by: <@{str(interaction.channel.topic.split('-')[-1])}> ({interaction.channel.mention})")
+            err = 1
+        if err == 0:
+            await interaction.followup.send(f"Successfully removed {member.mention} from the ticket!")
+            log_channel = client.get_channel(LOG_CHNL_ID)
+            await log_channel.send(f"<@{str(interaction.user.id)}> Just REMOVED {member.mention} from a ticket opened by: <@{str(interaction.channel.topic.split('-')[-1])}> ({interaction.channel.mention})")
+        else:
+            await interaction.followup.send(f"**__ERROR__** removing someone to the ticket!", ephemeral=True)
     else:
         await interaction.followup.send(f"Sorry, this command is only for staff!", ephemeral=True)
 
@@ -188,7 +200,6 @@ async def bump(interaction: discord.Interaction):
             err = 0
         except:
             err = 1
-            await interaction.channel.send(f"Hello <@{member}> :wave:", embed=em)
         if err == 0:
             await interaction.followup.send(f"Successfully bumped the ticket!", ephemeral=True)
         else:
