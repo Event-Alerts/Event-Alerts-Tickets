@@ -161,7 +161,7 @@ async def create_partner_ticket(client: discord.Client, username: str, servernam
     # Allow the bot too
     await channel.set_permissions(await guild.fetch_member(client.user.id), read_messages=True, send_messages=True)
     # Dont Allow muted role to use / cmds
-    await channel.set_permissions(guild.get_role(MUTED_ROLE_ID), use_application_commands=False, use_activities=False)
+    await channel.set_permissions(guild.get_role(MUTED_ROLE_ID), use_application_commands=False, use_embedded_activities=False, use_external_apps=False)
 
     # Allow users with the mod role to see and write in the channel
     mod_role = guild.get_role(MOD_ROLE_ID)
@@ -344,7 +344,7 @@ async def create_ticket(client: discord.Client, username: str, memberid: int, re
     # Allow the bot too
     await channel.set_permissions(await guild.fetch_member(client.user.id), read_messages=True, send_messages=True)
     # Dont Allow muted role to use / cmds
-    await channel.set_permissions(guild.get_role(MUTED_ROLE_ID), use_application_commands=False, use_activities=False)
+    await channel.set_permissions(guild.get_role(MUTED_ROLE_ID), use_application_commands=False, use_embedded_activities=False, use_external_apps=False)
     # Allow users with the mod role to see and write in the channel
     mod_role = guild.get_role(MOD_ROLE_ID)
     await channel.set_permissions(mod_role, read_messages=True, send_messages=True)
