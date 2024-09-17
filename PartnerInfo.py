@@ -45,11 +45,11 @@ class PartnerInfo(discord.ui.Modal, title='PARTNER INFORMATION'):
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.send_message(f'**_Creating ticket channel..._**', ephemeral=True)
         try:
-            member_count = utilities.get_discord_member_count(str(self.invite))
+            member_count, self.invite = utilities.format_url(str(self.invite))
         except:
             member_count = None
         if member_count:
-            cid = await utilities.create_partner_ticket(client=interaction.client, username=interaction.user.name, servername=self.servername, members=member_count, memberid=interaction.user.id, invite=self.invite, reason=self.partnerreason)
+            cid = await utilities.create_partner_ticket(client=interaction.client, username=interaction.user.name, servername=self.servername, memberid=interaction.user.id, invite=self.invite, reason=self.partnerreason)
             await interaction.edit_original_response(content=f'**_Done! -> <#{cid}>_**')
         else:
             await interaction.edit_original_response(content='**_Error! Invalid invite link!_**')

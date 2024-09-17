@@ -29,7 +29,7 @@ import io
 import json
 
 # UTILITIES.PY
-def get_discord_member_count(invite_url):
+def format_url(invite_url):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
@@ -37,18 +37,22 @@ def get_discord_member_count(invite_url):
         response = requests.get(invite_url, headers=headers)
     elif invite_url.startswith("discord.com/") or invite_url.startswith("discord.gg/"):
         response = requests.get(f"https://{invite_url}", headers=headers)
+        invite_url = f"https://{invite_url}"
     elif invite_url.startswith(".gg/"):
         response = requests.get(
             f"https://discord{invite_url}", headers=headers)
+        invite_url = f"https://discord{invite_url}"
     elif invite_url.startswith("gg/"):
         response = requests.get(
             f"https://discord.{invite_url}", headers=headers)
+        invite_url = f"https://discord.{invite_url}"
     else:
         response = requests.get(
             f"https://discord.gg/{invite_url}", headers=headers)
+        invite_url = f"https://discord.gg/{invite_url}"
     if response.status_code != 200:
         print(f"Failed to retrieve data: {response.status_code}")
-        return None
+        return None, invite_url
 
     soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -57,10 +61,10 @@ def get_discord_member_count(invite_url):
     if member_count_element:
         description = member_count_element['content']
         member_count = extract_member_count(description)
-        return member_count
+        return member_count, invite_url
     else:
         print("Member count element not found in the page.")
-        return None
+        return None, invite_url
 
 
 def extract_member_count(description):
@@ -144,20 +148,23 @@ def get_config(key=None):
         return config[key]
 
 
-async def create_partner_ticket(client: discord.Client, username: str, servername: str, members, memberid: int, invite: str, reason: str) -> str:
+async def create_partner_ticket(client: discord.Client, username: str, servername: str, memberid: int, invite: str, reason: str) -> str:
     TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID = get_config()
-    print("A")
+
     guild = await client.fetch_guild(SERVER_ID)
     category: discord.CategoryChannel = await client.fetch_channel(TICKET_CTGRY_ID)
     done_user = username.lower().replace(" ", "-")
     channel = await category.create_text_channel(name=f"🟡p-{done_user}")
+    
     await channel.edit(topic=f"TICKET-{str(memberid)}")
     # Set up permissions
     await channel.set_permissions(guild.default_role, read_messages=False, send_messages=False)
-    print("A")
+
     # Allow the ticket creator to see and write in the channel
     member = await guild.fetch_member(memberid)
     await channel.set_permissions(member, read_messages=True, send_messages=True)
+
+
     # Allow the bot too
     await channel.set_permissions(await guild.fetch_member(client.user.id), read_messages=True, send_messages=True)
     # Dont Allow muted role to use / cmds
@@ -165,13 +172,18 @@ async def create_partner_ticket(client: discord.Client, username: str, servernam
 
     # Allow users with the mod role to see and write in the channel
     mod_role = guild.get_role(MOD_ROLE_ID)
+
+
     await channel.set_permissions(mod_role, read_messages=True, send_messages=True)
-    em = discord.Embed(title=f"Partner Application - {servername}",
-                       description=f"Hello {username}! Your application ticket has been created!\n\n**__Information:__**\n**Servername:** ``{servername}``\n**Members:** ``{str(members)}``\n**Invite:** ``{invite}``\n**Partner reason:** ``{reason}``", color=discord.Color.yellow())
-    em.set_footer(text="EVENT ALERTS - TICKETS",
+
+
+    em = discord.Embed(title=f"Partner Application",
+                       description=f"{reason}", color=discord.Color.yellow())
+    em.add_field(name=servername, value=invite)
+    em.set_footer(text="EVENT ALERTS | TICKETS",
                   icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
     from CloseTicket import CloseTicket
-    await channel.send(content=f"<@{str(memberid)}>\n<@&{str(PING_ROLE)}>", embed=em, view=CloseTicket())
+    await channel.send(content=f"||<@{str(memberid)}><@&{str(PING_ROLE)}>||", embed=em, view=CloseTicket())
     return str(channel.id)
 
 
@@ -350,10 +362,10 @@ async def create_ticket(client: discord.Client, username: str, memberid: int, re
     await channel.set_permissions(mod_role, read_messages=True, send_messages=True)
     em = discord.Embed(
         title=f"Ticket - {username}", description=f"Hello {username}! Your ticket has been created!\n\n**__Information:__**\n**Ticket Reason:** ``{reason}``", color=discord.Color.yellow())
-    em.set_footer(text="EVENT ALERTS - TICKETS",
+    em.set_footer(text="EVENT ALERTS | TICKETS",
                   icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
     from CloseTicket import CloseTicket
-    await channel.send(content=f"<@{str(memberid)}>\n<@&{str(PING_ROLE)}>", embed=em, view=CloseTicket())
+    await channel.send(content=f"||<@{str(memberid)}><@&{str(PING_ROLE)}>||", embed=em, view=CloseTicket())
     log_channel = client.get_channel(LOG_CHNL_ID)
     await log_channel.send(f"<@{str(memberid)}> Just opened a ticket!\n<#{str(channel.id)}>")
     return str(channel.id)
