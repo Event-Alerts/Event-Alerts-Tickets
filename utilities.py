@@ -183,7 +183,7 @@ async def create_partner_ticket(client: discord.Client, username: str, servernam
     em.set_footer(text="EVENT ALERTS | TICKETS",
                   icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
     from CloseTicket import CloseTicket
-    await channel.send(content=f"||<@{str(memberid)}><@&{str(PING_ROLE)}>||", embed=em, view=CloseTicket())
+    await channel.send(content=f"||<@{str(memberid)}> <@&{str(PING_ROLE)}>|| {invite}", embed=em, view=CloseTicket())
     return str(channel.id)
 
 
@@ -336,7 +336,8 @@ async def close_ticket(client, channel, user):
     transcript_channel = channel.guild.get_channel(TRANSCRIPT_CHNL_ID)
     x = await transcript_channel.send(embed=discord.Embed(description=f"Transcripts for {channel.name}", color=discord.Color.blue()), files=[markdown_file, html_file])
     log_channel = client.get_channel(LOG_CHNL_ID)
-    await log_channel.send(f"<@{str(user.id)}> Just closed a ticket opened by: <@{str(channel.topic.split('-')[-1])}> (Transcript: https://discord.com/channels/{x.guild.id}/{x.channel.id}/{x.id})")
+    em = discord.Embed(title="TICKET CLOSED", color=discord.Color.red(), description=f"<@{str(user.id)}> Just closed a ticket opened by: <@{str(channel.topic.split('-')[-1])}> (Transcript: https://discord.com/channels/{x.guild.id}/{x.channel.id}/{x.id})")
+    await log_channel.send(embed=em)
     # Close the ticket
     await channel.delete()
 
@@ -365,7 +366,8 @@ async def create_ticket(client: discord.Client, username: str, memberid: int, re
     em.set_footer(text="EVENT ALERTS | TICKETS",
                   icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
     from CloseTicket import CloseTicket
-    await channel.send(content=f"||<@{str(memberid)}><@&{str(PING_ROLE)}>||", embed=em, view=CloseTicket())
+    await channel.send(content=f"||<@{str(memberid)}> <@&{str(PING_ROLE)}>||", embed=em, view=CloseTicket())
     log_channel = client.get_channel(LOG_CHNL_ID)
-    await log_channel.send(f"<@{str(memberid)}> Just opened a ticket!\n<#{str(channel.id)}>")
+    em = discord.Embed(title="TICKET OPENED", color=discord.Color.green(), description=f"<@{str(memberid)}> Just opened a ticket!\n<#{str(channel.id)}>")
+    await log_channel.send(embed=em)
     return str(channel.id)

@@ -153,7 +153,9 @@ async def add(interaction: discord.Interaction, member: discord.Member):
         if err == 0:
             await interaction.followup.send(f"Successfully added {member.mention} to the ticket!")
             log_channel = client.get_channel(LOG_CHNL_ID)
-            await log_channel.send(f"<@{str(interaction.user.id)}> Just ADDED {member.mention} from a ticket opened by: <@{str(interaction.channel.topic.split('-')[-1])}> ({interaction.channel.mention})")
+            em = discord.Embed(title="USER ADDED", color=discord.Color.green(), description=f"<@{str(interaction.user.id)}> Just ADDED {member.mention} from a ticket opened by: <@{str(interaction.channel.topic.split('-')[-1])}> ({interaction.channel.mention})")
+
+            await log_channel.send(embed=em)
         else:
             await interaction.followup.send(f"**__ERROR__** adding someone to the ticket!", ephemeral=True)
     else:
@@ -177,7 +179,8 @@ async def remove(interaction: discord.Interaction, member: discord.Member):
         if err == 0:
             await interaction.followup.send(f"Successfully removed {member.mention} from the ticket!")
             log_channel = client.get_channel(LOG_CHNL_ID)
-            await log_channel.send(f"<@{str(interaction.user.id)}> Just REMOVED {member.mention} from a ticket opened by: <@{str(interaction.channel.topic.split('-')[-1])}> ({interaction.channel.mention})")
+            em = discord.Embed(title="USER REMOVED", color=discord.Color.red(), description=f"<@{str(interaction.user.id)}> Just REMOVED {member.mention} from a ticket opened by: <@{str(interaction.channel.topic.split('-')[-1])}> ({interaction.channel.mention})")
+            await log_channel.send(embed=em)
         else:
             await interaction.followup.send(f"**__ERROR__** removing someone to the ticket!", ephemeral=True)
     else:
