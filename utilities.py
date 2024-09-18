@@ -156,7 +156,7 @@ async def create_partner_ticket(client: discord.Client, username: str, servernam
     done_user = username.lower().replace(" ", "-")
     channel = await category.create_text_channel(name=f"🟡p-{done_user}")
     
-    await channel.edit(topic=f"TICKET-{str(memberid)}")
+    await channel.edit(topic=f"TICKET.partner-{str(memberid)}")
     # Set up permissions
     await channel.set_permissions(guild.default_role, read_messages=False, send_messages=False)
 
@@ -180,10 +180,21 @@ async def create_partner_ticket(client: discord.Client, username: str, servernam
     em = discord.Embed(title=f"Partner Application",
                        description=f"{reason}", color=discord.Color.yellow())
     em.add_field(name=servername, value=invite)
-    em.set_footer(text="EVENT ALERTS | TICKETS",
+    em.set_footer(text="Event Alerts | Tickets",
                   icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
     from CloseTicket import CloseTicket
     await channel.send(content=f"||<@{str(memberid)}> <@&{str(PING_ROLE)}>|| {invite}", embed=em, view=CloseTicket())
+    log_channel = client.get_channel(LOG_CHNL_ID)
+    em = discord.Embed(title="TICKET OPENED", color=discord.Color.green())
+    em.add_field(name="Opener", value = f"<@{str(memberid)}>", inline=False)
+    em.add_field(name="Channel", value = f"<#{str(channel.id)}>", inline=False)
+    try:
+        member = await guild.fetch_member(int(memberid))
+        em.set_thumbnail(url=member.avatar.url)
+    except:
+        pass
+    em.set_footer(text="Event Alerts | Tickets", icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
+    await log_channel.send(embed=em)
     return str(channel.id)
 
 
@@ -340,10 +351,25 @@ async def close_ticket(client, channel, user):
     storage_message = await storage_channel.send(file=html_file)
     transcript_channel = channel.guild.get_channel(TRANSCRIPT_CHNL_ID)
     url = storage_message.attachments[0].url
-    x = await transcript_channel.send(embed=discord.Embed(description=f"Transcript for {channel.name}\n[Transcript]({url})", color=discord.Color.blue()))
     log_channel = client.get_channel(LOG_CHNL_ID)
-    em = discord.Embed(title="TICKET CLOSED", color=discord.Color.red(), description=f"<@{str(user.id)}> Just closed a ticket opened by: <@{str(channel.topic.split('-')[1])}> (Transcript: https://discord.com/channels/{x.guild.id}/{x.channel.id}/{x.id})")
+    em = discord.Embed(title="TICKET CLOSED", color=discord.Color.red())
+    em.add_field(name="Closer", value = f"<@{str(user.id)}>", inline=False)
+    em.add_field(name="Opener", value = f"<@{str(channel.topic.split('-')[1])}>", inline=False)
+    em.add_field(name="Channel", value = f"``{channel.name}``", inline=False)
+    try:
+        subject = channel.topic.split("-")[0].split(".")[1]
+    except:
+        subject = "Unknown"
+    em.add_field(name="Subject", value = f"``{subject}``", inline=False)
+    em.add_field(name="Transcript", value = f"[Click here]({url})", inline=False)
+    try:
+        member = await transcript_channel.guild.fetch_member(int(channel.topic.split('-')[1]))
+        em.set_thumbnail(url=member.avatar.url)
+    except:
+        pass
+    em.set_footer(text="Event Alerts | Tickets", icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
     await log_channel.send(embed=em)
+    await transcript_channel.send(embed=em)
     # Close the ticket
     await channel.delete()
 
@@ -354,7 +380,7 @@ async def create_ticket(client: discord.Client, username: str, memberid: int, re
     category: discord.CategoryChannel = await client.fetch_channel(TICKET_CTGRY_ID)
     done_user = username.lower().replace(" ", "-")
     channel = await category.create_text_channel(name=f"🟡t-{done_user}")
-    await channel.edit(topic=f"TICKET-{str(memberid)}")
+    await channel.edit(topic=f"TICKET.ticket-{str(memberid)}")
     # Set up permissions
     await channel.set_permissions(guild.default_role, read_messages=False, send_messages=False)
     # Allow the ticket creator to see and write in the channel
@@ -369,11 +395,19 @@ async def create_ticket(client: discord.Client, username: str, memberid: int, re
     await channel.set_permissions(mod_role, read_messages=True, send_messages=True)
     em = discord.Embed(
         title=f"Ticket - {username}", description=f"Hello {username}! Your ticket has been created!\n\n**__Information:__**\n**Ticket Reason:** ``{reason}``", color=discord.Color.yellow())
-    em.set_footer(text="EVENT ALERTS | TICKETS",
+    em.set_footer(text="Event Alerts | Tickets",
                   icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
     from CloseTicket import CloseTicket
     await channel.send(content=f"||<@{str(memberid)}> <@&{str(PING_ROLE)}>||", embed=em, view=CloseTicket())
     log_channel = client.get_channel(LOG_CHNL_ID)
-    em = discord.Embed(title="TICKET OPENED", color=discord.Color.green(), description=f"<@{str(memberid)}> Just opened a ticket!\n<#{str(channel.id)}>")
+    em = discord.Embed(title="TICKET OPENED", color=discord.Color.green())
+    em.add_field(name="Opener", value = f"<@{str(memberid)}>", inline=False)
+    em.add_field(name="Channel", value = f"<#{str(channel.id)}>", inline=False)
+    try:
+        member = await guild.fetch_member(int(memberid))
+        em.set_thumbnail(url=member.avatar.url)
+    except:
+        pass
+    em.set_footer(text="Event Alerts | Tickets", icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
     await log_channel.send(embed=em)
     return str(channel.id)

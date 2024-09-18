@@ -120,7 +120,7 @@ async def status(interaction: discord.Interaction, status: app_commands.Choice[s
     if "TICKET" not in interaction.channel.topic:
         await interaction.response.send_message(embed=discord.Embed(description="This command can only be used in ticket channels.", color=discord.Color.red()), ephemeral=True)
         return
-    await interaction.response.defer(thinking=True)
+    await interaction.response.defer(thinking=True, ephemeral=True)
     member = interaction.user
     if get(member.roles, id=MOD_ROLE_ID) or member.id == 971316880243576862 or interaction.user.guild_permissions.administrator:
         try:
@@ -153,8 +153,17 @@ async def add(interaction: discord.Interaction, member: discord.Member):
         if err == 0:
             await interaction.followup.send(f"Successfully added {member.mention} to the ticket!")
             log_channel = client.get_channel(LOG_CHNL_ID)
-            em = discord.Embed(title="USER ADDED", color=discord.Color.green(), description=f"<@{str(interaction.user.id)}> Just ADDED {member.mention} from a ticket opened by: <@{str(interaction.channel.topic.split('-')[1])}> ({interaction.channel.mention})")
-
+            em = discord.Embed(title="USER ADDED", color=discord.Color.dark_green())
+            em.add_field(name="Opener", value = f"<@{str(interaction.channel.topic.split('-')[1])}>", inline=False)
+            em.add_field(name="Adder", value = f"<@{str(interaction.user.id)}>", inline=False)
+            em.add_field(name="User", value = member.mention, inline=False)
+            em.add_field(name="Channel", value = interaction.channel.mention, inline=False)
+            try:
+                member = await interaction.guild.fetch_member(int(interaction.channel.topic.split('-')[1]))
+                em.set_thumbnail(url=member.avatar.url)
+            except:
+                pass
+            em.set_footer(text="Event Alerts | Tickets", icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
             await log_channel.send(embed=em)
         else:
             await interaction.followup.send(f"**__ERROR__** adding someone to the ticket!", ephemeral=True)
@@ -179,7 +188,17 @@ async def remove(interaction: discord.Interaction, member: discord.Member):
         if err == 0:
             await interaction.followup.send(f"Successfully removed {member.mention} from the ticket!")
             log_channel = client.get_channel(LOG_CHNL_ID)
-            em = discord.Embed(title="USER REMOVED", color=discord.Color.red(), description=f"<@{str(interaction.user.id)}> Just REMOVED {member.mention} from a ticket opened by: <@{str(interaction.channel.topic.split('-')[1])}> ({interaction.channel.mention})")
+            em = discord.Embed(title="USER REMOVED", color=discord.Color.orange())
+            em.add_field(name="Opener", value = f"<@{str(interaction.channel.topic.split('-')[1])}>", inline=False)
+            em.add_field(name="Remover", value = f"<@{str(interaction.user.id)}>", inline=False)
+            em.add_field(name="User", value = member.mention, inline=False)
+            em.add_field(name="Channel", value = interaction.channel.mention, inline=False)
+            try:
+                member = await interaction.guild.fetch_member(int(interaction.channel.topic.split('-')[1]))
+                em.set_thumbnail(url=member.avatar.url)
+            except:
+                pass
+            em.set_footer(text="Event Alerts | Tickets", icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
             await log_channel.send(embed=em)
         else:
             await interaction.followup.send(f"**__ERROR__** removing someone to the ticket!", ephemeral=True)

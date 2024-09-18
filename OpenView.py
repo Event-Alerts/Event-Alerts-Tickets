@@ -30,12 +30,14 @@ class OpenView(discord.ui.View):
     async def partner_button(self, interaction: discord.Interaction, button: discord.Button):
         # Check for existing tickets
         TICKET_CTGRY_ID = utilities.get_config("TICKET_CTGRY_ID")
-        category = interaction.guild.get_channel(TICKET_CTGRY_ID)
-        try:
-            user_tickets = [channel for channel in category.text_channels if str(
-                interaction.user.id) in channel.topic]
-        except:
-            user_tickets = []
+        category = await interaction.client.fetch_channel(TICKET_CTGRY_ID)
+        user_tickets = []
+        for channel in category.channels:
+            try:
+                if str(interaction.user.id) in channel.topic:
+                    user_tickets.append(channel)
+            except:
+                pass
         if len(user_tickets) >= 2:
             await interaction.response.send_message("You already have 2 open tickets. Please close an existing ticket before opening a new one.", ephemeral=True)
         else:
@@ -45,12 +47,14 @@ class OpenView(discord.ui.View):
     async def ticket_button(self, interaction: discord.Interaction, button: discord.Button):
         # Check for existing tickets
         TICKET_CTGRY_ID = utilities.get_config("TICKET_CTGRY_ID")
-        category = interaction.guild.get_channel(TICKET_CTGRY_ID)
-        try:
-            user_tickets = [channel for channel in category.text_channels if str(
-                interaction.user.id) in channel.topic]
-        except:
-            user_tickets = []
+        category = await interaction.client.fetch_channel(TICKET_CTGRY_ID)
+        user_tickets = []
+        for channel in category.channels:
+            try:
+                if str(interaction.user.id) in channel.topic:
+                    user_tickets.append(channel)
+            except:
+                pass
         if len(user_tickets) >= 2:
             await interaction.response.send_message("You already have 2 open tickets. Please close an existing ticket before opening a new one.", ephemeral=True)
         else:
