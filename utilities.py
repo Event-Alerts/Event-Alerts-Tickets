@@ -191,7 +191,11 @@ async def close_ticket(client, channel, user):
     TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID = get_config()
     storage_guild = await client.fetch_guild(STORAGE_SERVER_ID)
     storage_channel = await storage_guild.fetch_channel(STORAGE_CHANNEL_ID)
-
+    voicechannels = channel.topic.split('-')[2:]
+    for vc in voicechannels:
+        vchannel = await client.fetch_channel(int(vc))
+        await vchannel.delete()
+    print(voicechannels)
     # Generate markdown and HTML transcripts
     markdown_transcript = f"# Transcript for {channel.name}\n\n"
     html_transcript = f"""
@@ -338,7 +342,7 @@ async def close_ticket(client, channel, user):
     url = storage_message.attachments[0].url
     x = await transcript_channel.send(embed=discord.Embed(description=f"Transcript for {channel.name}\n[Transcript]({url})", color=discord.Color.blue()))
     log_channel = client.get_channel(LOG_CHNL_ID)
-    em = discord.Embed(title="TICKET CLOSED", color=discord.Color.red(), description=f"<@{str(user.id)}> Just closed a ticket opened by: <@{str(channel.topic.split('-')[-1])}> (Transcript: https://discord.com/channels/{x.guild.id}/{x.channel.id}/{x.id})")
+    em = discord.Embed(title="TICKET CLOSED", color=discord.Color.red(), description=f"<@{str(user.id)}> Just closed a ticket opened by: <@{str(channel.topic.split('-')[1])}> (Transcript: https://discord.com/channels/{x.guild.id}/{x.channel.id}/{x.id})")
     await log_channel.send(embed=em)
     # Close the ticket
     await channel.delete()

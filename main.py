@@ -153,7 +153,7 @@ async def add(interaction: discord.Interaction, member: discord.Member):
         if err == 0:
             await interaction.followup.send(f"Successfully added {member.mention} to the ticket!")
             log_channel = client.get_channel(LOG_CHNL_ID)
-            em = discord.Embed(title="USER ADDED", color=discord.Color.green(), description=f"<@{str(interaction.user.id)}> Just ADDED {member.mention} from a ticket opened by: <@{str(interaction.channel.topic.split('-')[-1])}> ({interaction.channel.mention})")
+            em = discord.Embed(title="USER ADDED", color=discord.Color.green(), description=f"<@{str(interaction.user.id)}> Just ADDED {member.mention} from a ticket opened by: <@{str(interaction.channel.topic.split('-')[1])}> ({interaction.channel.mention})")
 
             await log_channel.send(embed=em)
         else:
@@ -179,7 +179,7 @@ async def remove(interaction: discord.Interaction, member: discord.Member):
         if err == 0:
             await interaction.followup.send(f"Successfully removed {member.mention} from the ticket!")
             log_channel = client.get_channel(LOG_CHNL_ID)
-            em = discord.Embed(title="USER REMOVED", color=discord.Color.red(), description=f"<@{str(interaction.user.id)}> Just REMOVED {member.mention} from a ticket opened by: <@{str(interaction.channel.topic.split('-')[-1])}> ({interaction.channel.mention})")
+            em = discord.Embed(title="USER REMOVED", color=discord.Color.red(), description=f"<@{str(interaction.user.id)}> Just REMOVED {member.mention} from a ticket opened by: <@{str(interaction.channel.topic.split('-')[1])}> ({interaction.channel.mention})")
             await log_channel.send(embed=em)
         else:
             await interaction.followup.send(f"**__ERROR__** removing someone to the ticket!", ephemeral=True)
@@ -210,6 +210,42 @@ async def bump(interaction: discord.Interaction):
     else:
         await interaction.followup.send(f"Sorry, this command is only for staff!", ephemeral=True)
 
+
+
+vc = app_commands.Group(name="vc", description="Ticket voice channel related commands")
+
+@vc.command(name="create", description="STAFF | Create a voice channel for the ticket")
+async def create_vc(interaction: discord.Interaction):
+    category = interaction.channel.category
+    position = interaction.channel.position + 1
+    overwrites = interaction.channel.overwrites
+    if not len(interaction.channel.topic.split("-")) > 2:
+        new_vc = await interaction.guild.create_voice_channel(
+            name=f"VC-{interaction.channel.name[3:]}",
+            category=category,
+            position=position,
+            overwrites=overwrites
+        )
+        await interaction.channel.edit(topic=f"{interaction.channel.topic}-{str(new_vc.id)}")
+        await interaction.response.send_message(f"Voice channel {new_vc.mention} created successfully!", ephemeral=True)
+    else:
+        vcid = interaction.channel.topic.split("-")[-1]
+        await interaction.response.send_message(f"Voice channel already exists! <#{vcid}>", ephemeral=True)
+
+@vc.command(name="delete", description="STAFF | Deletes the voice channel for the ticket")
+async def delete_vc(interaction: discord.Interaction):
+    if len(interaction.channel.topic.split("-")) < 3:
+        await interaction.response.send_message(f"No voice channel found for this ticket!", ephemeral=True)
+    else:
+        vcid = interaction.channel.topic.split("-")[-1]
+        vchannel = await client.fetch_channel(int(vcid))
+        await vchannel.delete()
+        await interaction.channel.edit(topic=interaction.channel.topic.replace(f"-{vcid}", ""))
+        await interaction.response.send_message(f"Voice channel deleted successfully!", ephemeral=True)
+
+
+
+
 # ADDING COMMANDS
 tree.add_command(ticketmsg)
 tree.add_command(close)
@@ -217,6 +253,7 @@ tree.add_command(status)
 tree.add_command(add)
 tree.add_command(remove)
 tree.add_command(bump)
+tree.add_command(vc)
 
 # RUNNING
 client.run(TOKEN)
