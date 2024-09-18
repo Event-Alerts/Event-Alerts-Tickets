@@ -26,7 +26,7 @@ class OpenView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
-    @discord.ui.button(label="APPLY FOR PARTNER", emoji="🤝", style=discord.ButtonStyle.blurple, custom_id="partner_button")
+    @discord.ui.button(label="Apply for Partner", emoji="🤝", style=discord.ButtonStyle.blurple, custom_id="partner_button")
     async def partner_button(self, interaction: discord.Interaction, button: discord.Button):
         # Check for existing tickets
         TICKET_CTGRY_ID = utilities.get_config("TICKET_CTGRY_ID")
@@ -41,7 +41,7 @@ class OpenView(discord.ui.View):
         else:
             await interaction.response.send_modal(PartnerInfo())
 
-    @discord.ui.button(label="OPEN A SUPPORT TICKET", emoji="🎫", style=discord.ButtonStyle.gray, custom_id="ticket_button")
+    @discord.ui.button(label="Open a support ticket", emoji="🎫", style=discord.ButtonStyle.gray, custom_id="ticket_button")
     async def ticket_button(self, interaction: discord.Interaction, button: discord.Button):
         # Check for existing tickets
         TICKET_CTGRY_ID = utilities.get_config("TICKET_CTGRY_ID")

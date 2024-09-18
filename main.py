@@ -67,15 +67,15 @@ async def on_message(message):
     print(message)
 
 
-@app_commands.command(description="ADMIN ONLY | Send the ticket msg!")
+@app_commands.command(description="ADMIN | Send the ticket msg!")
 async def ticketmsg(interaction: discord.Interaction, channel: discord.TextChannel):
     if interaction.user.guild_permissions.administrator or interaction.user.id == 971316880243576862:
         em = discord.Embed(description=f'Do NOT open a ticket to "see what it does" or for matters that do not concern us\nWe **will** punish you for opening a ticket for an invalid reason',
                            title=":sos: Event Alerts Support", color=discord.Color.red())
         em.add_field(name=":handshake: Applying for Partner",
-                     value="Please read all of the requirements and necessary information **[HERE](https://discord.com/channels/970411885293895801/970415677393477734/1179203344917614662)**\nOnce you're ready, you can click the ``APPLY FOR PARTNER`` button below!")
+                     value="Please read all of the requirements and necessary information **[here](https://discord.com/channels/970411885293895801/970415677393477734/1179203344917614662)**\nOnce you're ready, you can click the ``Apply for Partner`` button below!")
         em.add_field(name=":ticket: General server support",
-                     value="If you have any other questions about the server, feel free to create a ticket to ask us\nJust click the ``OPEN A SUPPORT TICKET`` button below to get started!")
+                     value="If you have any other questions about the server, feel free to create a ticket to ask us\nJust click the ``Open a support ticket`` button below to get started!")
         view = OpenView()
         await channel.send(embed=em, view=view)
         await interaction.response.send_message("**Done!**", ephemeral=True)
@@ -107,16 +107,16 @@ async def close(interaction: discord.Interaction, time: str = None):
             await utilities.close_ticket(interaction.client, interaction.channel, interaction.user)
 
 
-@app_commands.command(description="STAFF ONLY | Change the priority of the current ticket")
-@app_commands.describe(priority="The priority of the current ticket")
-@app_commands.choices(priority=[
-    app_commands.Choice(name="Waiting to close", value="🕑"),
-    app_commands.Choice(name="Waiting for something to happen", value="⏩"),
+@app_commands.command(description="STAFF | Change the status of the current ticket")
+@app_commands.describe(status="The status of the current ticket")
+@app_commands.choices(status=[
+    app_commands.Choice(name="Closure pending", value="❌"),
+    app_commands.Choice(name="Waiting for something to happen", value="⏳"),
     app_commands.Choice(name="Mod Attention", value="🟡"),
-    app_commands.Choice(name="ADMIN ATTENTION", value="🔴"),
-    app_commands.Choice(name="Their Turn", value="👍")
+    app_commands.Choice(name="HIGH PRIORITY", value="🔴"),
+    app_commands.Choice(name="Waiting for response", value="👍")
 ])
-async def priority(interaction: discord.Interaction, priority: app_commands.Choice[str]):
+async def status(interaction: discord.Interaction, status: app_commands.Choice[str]):
     if "TICKET" not in interaction.channel.topic:
         await interaction.response.send_message(embed=discord.Embed(description="This command can only be used in ticket channels.", color=discord.Color.red()), ephemeral=True)
         return
@@ -124,19 +124,19 @@ async def priority(interaction: discord.Interaction, priority: app_commands.Choi
     member = interaction.user
     if get(member.roles, id=MOD_ROLE_ID) or member.id == 971316880243576862 or interaction.user.guild_permissions.administrator:
         try:
-            await interaction.channel.edit(name=f"{priority.value}{interaction.channel.name[1:]}")
+            await interaction.channel.edit(name=f"{status.value}{interaction.channel.name[1:]}")
             err = 0
         except:
             err = 1
         if err == 0:
-            await interaction.followup.send(f"Successfully changed the ticket priority to {priority.name}!", ephemeral=True)
+            await interaction.followup.send(f"Successfully changed the ticket status to {status.name}!", ephemeral=True)
         else:
-            await interaction.followup.send(f"**__ERROR__** changing the ticket priority!", ephemeral=True)
+            await interaction.followup.send(f"**__ERROR__** changing the ticket status!", ephemeral=True)
     else:
         await interaction.followup.send("Sorry, this command is only for staff!", ephemeral=True)
 
 
-@app_commands.command(description="STAFF ONLY | Add someone to the current ticket")
+@app_commands.command(description="STAFF | Add someone to the current ticket")
 @app_commands.describe(member="The member to add to the current ticket")
 async def add(interaction: discord.Interaction, member: discord.Member):
     if "TICKET" not in interaction.channel.topic:
@@ -144,7 +144,7 @@ async def add(interaction: discord.Interaction, member: discord.Member):
         return
     await interaction.response.defer(thinking=True)
 
-    if get(interaction.user.roles, id=MOD_ROLE_ID) or interaction.user.id == 971316880243576862 or interaction.user.guild_permissions.administrator:
+    if get(interaction.user.roles, id=MOD_ROLE_ID) or interaction.user.id == 971316880243576862 or interaction.user.guild_permissions.administrator or str(interaction.user.id) in interaction.channel.topic:
         try:
             await interaction.channel.set_permissions(member, read_messages=True, send_messages=True)
             err = 0
@@ -162,7 +162,7 @@ async def add(interaction: discord.Interaction, member: discord.Member):
         await interaction.followup.send(f"Sorry, this command is only for staff!", ephemeral=True)
 
 
-@app_commands.command(description="STAFF ONLY | Remove someone from the current ticket")
+@app_commands.command(description="STAFF | Remove someone from the current ticket")
 @app_commands.describe(member="The member to remove from the current ticket")
 async def remove(interaction: discord.Interaction, member: discord.Member):
     if "TICKET" not in interaction.channel.topic:
@@ -170,7 +170,7 @@ async def remove(interaction: discord.Interaction, member: discord.Member):
         return
     await interaction.response.defer(thinking=True)
 
-    if get(interaction.user.roles, id=MOD_ROLE_ID) or interaction.user.id == 971316880243576862 or interaction.user.guild_permissions.administrator:
+    if get(interaction.user.roles, id=MOD_ROLE_ID) or interaction.user.id == 971316880243576862 or interaction.user.guild_permissions.administrator or str(interaction.user.id) in interaction.channel.topic:
         try:
             await interaction.channel.set_permissions(member, read_messages=False, send_messages=False)
             err = 0
@@ -187,7 +187,7 @@ async def remove(interaction: discord.Interaction, member: discord.Member):
         await interaction.followup.send(f"Sorry, this command is only for staff!", ephemeral=True)
 
 
-@app_commands.command(description="STAFF ONLY | Bump the current ticket")
+@app_commands.command(description="STAFF | Bump the current ticket")
 async def bump(interaction: discord.Interaction):
     if "TICKET" not in interaction.channel.topic:
         await interaction.response.send_message(embed=discord.Embed(description="This command can only be used in ticket channels.", color=discord.Color.red()), ephemeral=True)
@@ -213,7 +213,7 @@ async def bump(interaction: discord.Interaction):
 # ADDING COMMANDS
 tree.add_command(ticketmsg)
 tree.add_command(close)
-tree.add_command(priority)
+tree.add_command(status)
 tree.add_command(add)
 tree.add_command(remove)
 tree.add_command(bump)
