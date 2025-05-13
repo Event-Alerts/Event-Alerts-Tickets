@@ -17,7 +17,7 @@
 
 # IMPORTS
 import discord
-from PartnerInfo import PartnerInfo
+from AdminInfo import AdminInfo
 from TicketInfo import TicketInfo
 import utilities
 
@@ -25,23 +25,6 @@ import utilities
 class OpenView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
-
-    @discord.ui.button(label="Apply for Partner", emoji="🤝", style=discord.ButtonStyle.blurple, custom_id="partner_button")
-    async def partner_button(self, interaction: discord.Interaction, button: discord.Button):
-        # Check for existing tickets
-        TICKET_CTGRY_ID = utilities.get_config("TICKET_CTGRY_ID")
-        category = await interaction.client.fetch_channel(TICKET_CTGRY_ID)
-        user_tickets = []
-        for channel in category.channels:
-            try:
-                if str(interaction.user.id) in channel.topic:
-                    user_tickets.append(channel)
-            except:
-                pass
-        if len(user_tickets) >= 2:
-            await interaction.response.send_message("You already have 2 open tickets. Please close an existing ticket before opening a new one.", ephemeral=True)
-        else:
-            await interaction.response.send_modal(PartnerInfo())
 
     @discord.ui.button(label="Open a support ticket", emoji="🎫", style=discord.ButtonStyle.gray, custom_id="ticket_button")
     async def ticket_button(self, interaction: discord.Interaction, button: discord.Button):
@@ -59,3 +42,20 @@ class OpenView(discord.ui.View):
             await interaction.response.send_message("You already have 2 open tickets. Please close an existing ticket before opening a new one.", ephemeral=True)
         else:
             await interaction.response.send_modal(TicketInfo())
+
+    @discord.ui.button(label="Contact the Admins", emoji="⚠️", style=discord.ButtonStyle.red, custom_id="admin_button")
+    async def admin_button(self, interaction: discord.Interaction, button: discord.Button):
+        # Check for existing tickets
+        ADMIN_TICKET_CTGRY_ID = utilities.get_config("ADMIN_TICKET_CTGRY_ID")
+        category = await interaction.client.fetch_channel(ADMIN_TICKET_CTGRY_ID)
+        user_tickets = []
+        for channel in category.channels:
+            try:
+                if str(interaction.user.id) in channel.topic:
+                    user_tickets.append(channel)
+            except:
+                pass
+        if len(user_tickets) >= 2:
+            await interaction.response.send_message("You already have 2 open tickets. Please close an existing ticket before opening a new one.", ephemeral=True)
+        else:
+            await interaction.response.send_modal(AdminInfo())

@@ -19,8 +19,8 @@
 import discord
 import utilities
 
-# TICKETINFO.PY
-class TicketInfo(discord.ui.Modal, title='Ticket Information'):
+# ADMININFO.PY
+class AdminInfo(discord.ui.Modal, title='Admin Ticket Information'):
 
     ticketreason = discord.ui.TextInput(
         label='Ticket Reason',
@@ -32,8 +32,8 @@ class TicketInfo(discord.ui.Modal, title='Ticket Information'):
 
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.send_message(f'**_Creating ticket channel..._**', ephemeral=True)
-        cid = await utilities.create_ticket(client=interaction.client, username=interaction.user.name, memberid=interaction.user.id, reason=self.ticketreason)
-        await interaction.edit_original_response(content=f'**_Done! -> <#{cid}>_**')
+        cid = await utilities.create_admin_ticket(client=interaction.client, username=interaction.user.name, memberid=interaction.user.id, reason=self.ticketreason)
+        await interaction.edit_original_response(content=f'<:eaticketyes:1371503431356911818> Ticket created! <#{cid}>')
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         try:

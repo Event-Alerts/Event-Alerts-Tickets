@@ -142,48 +142,39 @@ def get_config(key=None):
         PING_ROLE = int(config["PING_ROLE"])
         LOG_CHNL_ID = int(config["LOG_CHNL_ID"])
         MUTED_ROLE_ID = int(config["MUTED_ROLE_ID"])
+        ADMIN_TICKET_CTGRY_ID = int(config["ADMIN_TICKET_CTGRY_ID"])
+        ADMIN_ROLE_ID = int(config["ADMIN_ROLE_ID"])
     if key == None:
-        return TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID
+        return TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID, ADMIN_TICKET_CTGRY_ID, ADMIN_ROLE_ID
     else:
         return config[key]
 
 
-async def create_partner_ticket(client: discord.Client, username: str, servername: str, memberid: int, invite: str, reason: str) -> str:
-    TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID = get_config()
-
+async def create_admin_ticket(client: discord.Client, username: str, memberid: int, reason: str) -> str:
+    TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID, ADMIN_TICKET_CTGRY_ID, ADMIN_ROLE_ID = get_config()
     guild = await client.fetch_guild(SERVER_ID)
-    category: discord.CategoryChannel = await client.fetch_channel(TICKET_CTGRY_ID)
+    category: discord.CategoryChannel = await client.fetch_channel(ADMIN_TICKET_CTGRY_ID)
     done_user = username.lower().replace(" ", "-")
-    channel = await category.create_text_channel(name=f"🟡p-{done_user}")
-    
-    await channel.edit(topic=f"TICKET.partner-{str(memberid)}")
+    channel = await category.create_text_channel(name=f"🟡a-{done_user}")
+    await channel.edit(topic=f"TICKET.admin-{str(memberid)}")
     # Set up permissions
     await channel.set_permissions(guild.default_role, read_messages=False, send_messages=False)
-
     # Allow the ticket creator to see and write in the channel
     member = await guild.fetch_member(memberid)
     await channel.set_permissions(member, read_messages=True, send_messages=True)
-
-
     # Allow the bot too
     await channel.set_permissions(await guild.fetch_member(client.user.id), read_messages=True, send_messages=True)
     # Dont Allow muted role to use / cmds
     await channel.set_permissions(guild.get_role(MUTED_ROLE_ID), use_application_commands=False, use_embedded_activities=False, use_external_apps=False)
-
-    # Allow users with the mod role to see and write in the channel
-    mod_role = guild.get_role(MOD_ROLE_ID)
-
-
-    await channel.set_permissions(mod_role, read_messages=True, send_messages=True)
-
-
-    em = discord.Embed(title=f"Partner Application",
-                       description=f"{reason}", color=discord.Color.yellow())
-    em.add_field(name=servername, value=invite)
+    # Allow users with the admin role to see and write in the channel
+    admin_role = guild.get_role(ADMIN_ROLE_ID)
+    await channel.set_permissions(admin_role, read_messages=True, send_messages=True)
+    em = discord.Embed(
+        title=f"Ticket - {username}", description=f"Hello {username}! Your ticket has been created!\n\n**__Information:__**\n**Ticket Reason:** ``{reason}``", color=discord.Color.from_str("#D49B08"))
     em.set_footer(text="Event Alerts | Tickets",
                   icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
     from CloseTicket import CloseTicket
-    await channel.send(content=f"||<@{str(memberid)}> <@&{str(PING_ROLE)}>|| {invite}", embed=em, view=CloseTicket())
+    await channel.send(content=f"<@{str(memberid)}> <@&{str(PING_ROLE)}>", embed=em, view=CloseTicket())
     log_channel = client.get_channel(LOG_CHNL_ID)
     em = discord.Embed(title="TICKET OPENED", color=discord.Color.green())
     em.add_field(name="Opener", value = f"<@{str(memberid)}>", inline=False)
@@ -198,14 +189,55 @@ async def create_partner_ticket(client: discord.Client, username: str, servernam
     return str(channel.id)
 
 
+async def create_ticket(client: discord.Client, username: str, memberid: int, reason: str) -> str:
+    TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID, ADMIN_TICKET_CTGRY_ID, ADMIN_ROLE_ID = get_config()
+    guild = await client.fetch_guild(SERVER_ID)
+    category: discord.CategoryChannel = await client.fetch_channel(TICKET_CTGRY_ID)
+    done_user = username.lower().replace(" ", "-")
+    channel = await category.create_text_channel(name=f"🟡t-{done_user}")
+    await channel.edit(topic=f"TICKET.ticket-{str(memberid)}")
+    # Set up permissions
+    await channel.set_permissions(guild.default_role, read_messages=False, send_messages=False)
+    # Allow the ticket creator to see and write in the channel
+    member = await guild.fetch_member(memberid)
+    await channel.set_permissions(member, read_messages=True, send_messages=True)
+    # Allow the bot too
+    await channel.set_permissions(await guild.fetch_member(client.user.id), read_messages=True, send_messages=True)
+    # Dont Allow muted role to use / cmds
+    await channel.set_permissions(guild.get_role(MUTED_ROLE_ID), use_application_commands=False, use_embedded_activities=False, use_external_apps=False)
+    # Allow users with the mod role to see and write in the channel
+    mod_role = guild.get_role(MOD_ROLE_ID)
+    await channel.set_permissions(mod_role, read_messages=True, send_messages=True)
+    em = discord.Embed(
+        title=f"Ticket - {username}", description=f"Hello {username}! Your ticket has been created!\n\n**__Information:__**\n**Ticket Reason:** ``{reason}``", color=discord.Color.from_str("#D49B08"))
+    em.set_footer(text="Event Alerts | Tickets",
+                  icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
+    from CloseTicket import CloseTicket
+    await channel.send(content=f"<@{str(memberid)}> <@&{str(PING_ROLE)}>", embed=em, view=CloseTicket())
+    log_channel = client.get_channel(LOG_CHNL_ID)
+    em = discord.Embed(title="TICKET OPENED", color=discord.Color.green())
+    em.add_field(name="Opener", value = f"<@{str(memberid)}>", inline=False)
+    em.add_field(name="Channel", value = f"<#{str(channel.id)}>", inline=False)
+    try:
+        member = await guild.fetch_member(int(memberid))
+        em.set_thumbnail(url=member.avatar.url)
+    except:
+        pass
+    em.set_footer(text="Event Alerts | Tickets", icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
+    await log_channel.send(embed=em)
+    return str(channel.id)
+
 async def close_ticket(client, channel, user):
-    TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID = get_config()
+    TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID, ADMIN_TICKET_CTGRY_ID, ADMIN_ROLE_ID = get_config()
     storage_guild = await client.fetch_guild(STORAGE_SERVER_ID)
     storage_channel = await storage_guild.fetch_channel(STORAGE_CHANNEL_ID)
     voicechannels = channel.topic.split('-')[2:]
     for vc in voicechannels:
-        vchannel = await client.fetch_channel(int(vc))
-        await vchannel.delete()
+        try:
+            vchannel = await client.fetch_channel(int(vc))
+            await vchannel.delete()
+        except:
+            pass
     print(voicechannels)
     # Generate markdown and HTML transcripts
     markdown_transcript = f"# Transcript for {channel.name}\n\n"
@@ -372,42 +404,3 @@ async def close_ticket(client, channel, user):
     await transcript_channel.send(embed=em)
     # Close the ticket
     await channel.delete()
-
-
-async def create_ticket(client: discord.Client, username: str, memberid: int, reason: str) -> str:
-    TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID = get_config()
-    guild = await client.fetch_guild(SERVER_ID)
-    category: discord.CategoryChannel = await client.fetch_channel(TICKET_CTGRY_ID)
-    done_user = username.lower().replace(" ", "-")
-    channel = await category.create_text_channel(name=f"🟡t-{done_user}")
-    await channel.edit(topic=f"TICKET.ticket-{str(memberid)}")
-    # Set up permissions
-    await channel.set_permissions(guild.default_role, read_messages=False, send_messages=False)
-    # Allow the ticket creator to see and write in the channel
-    member = await guild.fetch_member(memberid)
-    await channel.set_permissions(member, read_messages=True, send_messages=True)
-    # Allow the bot too
-    await channel.set_permissions(await guild.fetch_member(client.user.id), read_messages=True, send_messages=True)
-    # Dont Allow muted role to use / cmds
-    await channel.set_permissions(guild.get_role(MUTED_ROLE_ID), use_application_commands=False, use_embedded_activities=False, use_external_apps=False)
-    # Allow users with the mod role to see and write in the channel
-    mod_role = guild.get_role(MOD_ROLE_ID)
-    await channel.set_permissions(mod_role, read_messages=True, send_messages=True)
-    em = discord.Embed(
-        title=f"Ticket - {username}", description=f"Hello {username}! Your ticket has been created!\n\n**__Information:__**\n**Ticket Reason:** ``{reason}``", color=discord.Color.yellow())
-    em.set_footer(text="Event Alerts | Tickets",
-                  icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
-    from CloseTicket import CloseTicket
-    await channel.send(content=f"||<@{str(memberid)}> <@&{str(PING_ROLE)}>||", embed=em, view=CloseTicket())
-    log_channel = client.get_channel(LOG_CHNL_ID)
-    em = discord.Embed(title="TICKET OPENED", color=discord.Color.green())
-    em.add_field(name="Opener", value = f"<@{str(memberid)}>", inline=False)
-    em.add_field(name="Channel", value = f"<#{str(channel.id)}>", inline=False)
-    try:
-        member = await guild.fetch_member(int(memberid))
-        em.set_thumbnail(url=member.avatar.url)
-    except:
-        pass
-    em.set_footer(text="Event Alerts | Tickets", icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
-    await log_channel.send(embed=em)
-    return str(channel.id)

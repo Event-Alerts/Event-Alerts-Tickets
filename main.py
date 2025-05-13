@@ -23,7 +23,7 @@ import json
 from discord.utils import get
 import asyncio
 from discord import app_commands
-from CloseTicket import CloseTicket
+from CloseTicket import CloseTicket, closeTicket, scheduled_closures
 from CancelButton import CancelButton
 from OpenView import OpenView
 import utilities
@@ -40,8 +40,7 @@ if not os.path.exists(f"{cwd}/config.json"):
                    "TICKET_CTGRY_ID": "YOUR_TICKET_CTGRY_ID", "PING_ROLE": "YOUR_PING_ROLE",
                    "LOG_CHNL_ID": "YOUR_LOG_CHNL_ID", "MUTED_ROLE_ID": "MUTED_ROLE_ID"}, f)
 
-TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID = utilities.get_config()
-
+TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID, ADMIN_TICKET_CTGRY_ID, ADMIN_ROLE_ID = utilities.get_config()
 # SETUP
 intents = discord.Intents.all()
 activity = discord.Activity(
@@ -72,10 +71,10 @@ async def ticketmsg(interaction: discord.Interaction, channel: discord.TextChann
     if interaction.user.guild_permissions.administrator or interaction.user.id == 971316880243576862:
         em = discord.Embed(description=f'Do NOT open a ticket to "see what it does" or for matters that do not concern us\nWe **will** punish you for opening a ticket for an invalid reason',
                            title=":sos: Event Alerts Support", color=discord.Color.red())
-        em.add_field(name=":handshake: Applying for Partner",
-                     value="Please read all of the requirements and necessary information **[here](https://discord.com/channels/970411885293895801/970415677393477734/1179203344917614662)**\nOnce you're ready, you can click the ``Apply for Partner`` button below!")
-        em.add_field(name=":ticket: General server support",
-                     value="If you have any other questions about the server, feel free to create a ticket to ask us\nJust click the ``Open a support ticket`` button below to get started!")
+        em.add_field(name="**:ticket: General server support**",
+                     value="If you have general questions about the server, feel free to create a ticket to ask us\nJust click the **Open a support ticket** button below to get started!")
+        em.add_field(name="**:warning: Contact the Admins**",
+                     value="If you need to contact the Admins, please create an Admin ticket\nOnce you're ready, you can click the **Contact the Admins** button below!")
         view = OpenView()
         await channel.send(embed=em, view=view)
         await interaction.response.send_message("**Done!**", ephemeral=True)
@@ -89,14 +88,27 @@ async def close(interaction: discord.Interaction, time: str = None):
     if "TICKET" not in interaction.channel.topic:
         await interaction.response.send_message(embed=discord.Embed(description="This command can only be used in ticket channels.", color=discord.Color.red()), ephemeral=True)
         return
+    # Check if already scheduled for closure
+    if interaction.channel.id in scheduled_closures:
+        await interaction.response.send_message(
+            "This ticket is already scheduled for closure.", ephemeral=True
+        )
+        return
 
+    if "TICKET" not in (interaction.channel.topic or ""):
+        await interaction.response.send_message(
+            "This button can only be used in ticket channels.", ephemeral=True
+        )
+        return
+    # Mark as scheduled for closure
+    scheduled_closures.add(interaction.channel.id)
     seconds = utilities.parse_time(time)
 
-    view = CancelButton()
+    view = CancelButton(close_callback=utilities.close_ticket, close_args=[interaction.client, interaction.channel, interaction.user])
     embed = discord.Embed(
         title="Ticket Closure",
-        description=f"This ticket will be closed in {seconds} seconds. Click 'Cancel' to stop.",
-        color=discord.Color.yellow()
+        description=f"This ticket will be closed in {seconds} seconds. Click ``Cancel`` to stop.",
+        color=discord.Color.red()
     )
     await interaction.response.send_message(embed=embed, view=view)
 
@@ -105,6 +117,9 @@ async def close(interaction: discord.Interaction, time: str = None):
     except asyncio.TimeoutError:
         if not view.cancelled:
             await utilities.close_ticket(interaction.client, interaction.channel, interaction.user)
+    finally:
+        # Remove from scheduled closures regardless of outcome
+        scheduled_closures.discard(interaction.channel.id)
 
 
 @app_commands.command(description="STAFF | Change the status of the current ticket")
@@ -129,7 +144,7 @@ async def status(interaction: discord.Interaction, status: app_commands.Choice[s
         except:
             err = 1
         if err == 0:
-            await interaction.followup.send(f"Successfully changed the ticket status to {status.name}!", ephemeral=True)
+            await interaction.followup.send(f"<:eaticketyes:1371503431356911818> Successfully changed the ticket status to **{status.name}**!", ephemeral=True)
         else:
             await interaction.followup.send(f"**__ERROR__** changing the ticket status!", ephemeral=True)
     else:
@@ -151,7 +166,7 @@ async def add(interaction: discord.Interaction, member: discord.Member):
         except:
             err = 1
         if err == 0:
-            await interaction.followup.send(f"Successfully added {member.mention} to the ticket!")
+            await interaction.followup.send(f"<:eaticketyes:1371503431356911818> Successfully added {member.mention} to the ticket!")
             log_channel = client.get_channel(LOG_CHNL_ID)
             em = discord.Embed(title="USER ADDED", color=discord.Color.dark_green())
             em.add_field(name="Opener", value = f"<@{str(interaction.channel.topic.split('-')[1])}>", inline=False)
@@ -186,7 +201,7 @@ async def remove(interaction: discord.Interaction, member: discord.Member):
         except:
             err = 1
         if err == 0:
-            await interaction.followup.send(f"Successfully removed {member.mention} from the ticket!")
+            await interaction.followup.send(f"<:eaticketyes:1371503431356911818> Successfully removed {member.mention} from the ticket!")
             log_channel = client.get_channel(LOG_CHNL_ID)
             em = discord.Embed(title="USER REMOVED", color=discord.Color.orange())
             em.add_field(name="Opener", value = f"<@{str(interaction.channel.topic.split('-')[1])}>", inline=False)
@@ -217,13 +232,13 @@ async def bump(interaction: discord.Interaction):
         try:
             member = interaction.channel.topic.split("-")[1]
             em = discord.Embed(title="Are you still here?",
-                               description="We have received no feedback from your side recently", color=discord.Color.yellow())
+                               description="We have received no feedback from your side recently", color=discord.Color.from_str("#D49B08"))
             await interaction.channel.send(f"Hello <@{member}> :wave:", embed=em)
             err = 0
         except:
             err = 1
         if err == 0:
-            await interaction.followup.send(f"Successfully bumped the ticket!", ephemeral=True)
+            await interaction.followup.send(f"<:eaticketyes:1371503431356911818> Successfully bumped the ticket!", ephemeral=True)
         else:
             await interaction.followup.send(f"**__ERROR__** bumping the ticket!", ephemeral=True)
     else:

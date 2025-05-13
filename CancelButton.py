@@ -20,15 +20,39 @@ import discord
 
 # CANCELBUTTON.PY
 class CancelButton(discord.ui.View):
-    def __init__(self):
+    def __init__(self, close_callback=None, close_args=None):
         super().__init__(timeout=None)
         self.cancelled = False
+        self.closed_now = False
+        self.close_callback = close_callback  # Function to call for closing
+        self.close_args = close_args or []    # Arguments for the close function
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="cancel_button")
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="<:eaticketno:1371503463673892988>", custom_id="cancel_button")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.cancelled = True
         for item in self.children:
             item.disabled = True
         await interaction.response.edit_message(view=self)
-        await interaction.followup.send(embed=discord.Embed(description=f"Ticket closure cancelled by {interaction.user.mention}", color=discord.Color.green()))
+        await interaction.followup.send(
+            embed=discord.Embed(
+                description=f"Ticket closure cancelled by {interaction.user.mention}",
+                color=discord.Color.green()
+            )
+        )
+        self.stop()
+
+    @discord.ui.button(label="Close Now", style=discord.ButtonStyle.gray, emoji="<:eatickettrash:1371926108555055215>", custom_id="close_now_button")
+    async def close_now(self, interaction: discord.Interaction, button: discord.ui.Button):
+        self.closed_now = True
+        for item in self.children:
+            item.disabled = True
+        await interaction.response.edit_message(view=self)
+        await interaction.followup.send(
+            embed=discord.Embed(
+                description=f"Ticket closed immediately by {interaction.user.mention}",
+                color=discord.Color.red()
+            )
+        )
+        if self.close_callback:
+            await self.close_callback(*self.close_args)
         self.stop()
