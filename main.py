@@ -23,6 +23,7 @@ import json
 from discord.utils import get
 import asyncio
 from discord import app_commands
+import requests
 from CloseTicket import CloseTicket, closeTicket, scheduled_closures
 from CancelButton import CancelButton
 from OpenView import OpenView
@@ -54,6 +55,8 @@ tree = app_commands.CommandTree(client)
 @client.event
 async def on_ready():
     print("We have logged in as {0.user}".format(client))
+    bio = "The official Ticket bot for the Event Alerts Discord server!\n\nMade by ``QWERTZ``, the 2nd coolest person ever..."
+    await requests.patch(url="https://discord.com/api/v9/users/@me", headers= {"authorization": utilities.get_config("TOKEN")}, json = {"bio": bio} )
     print("Bot prefix is: /")
     await tree.sync()
     print("Tree synced!")
