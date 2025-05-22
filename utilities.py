@@ -376,7 +376,8 @@ async def close_ticket(client, channel, user):
         </html>"""
 
 #    markdown_file = discord.File(io.StringIO(
-#        markdown_transcript), filename=f"{channel.name}_transcript.md")
+#        markdown_transcript), filename=f"{channel.name}_transcript.md" )
+    html_transcript = html_transcript.replace("https://cdn.discordapp.com/attachments", "https://fixcdn.hyonsu.com/attachments")
     html_file = discord.File(io.StringIO(
         html_transcript), filename=f"{channel.name}_transcript.html")
 

@@ -53,6 +53,7 @@ tree = app_commands.CommandTree(client)
 # MAIN
 @client.event
 async def on_ready():
+    print("We have logged in as {0.user}".format(client))
     print("Bot prefix is: /")
     await tree.sync()
     print("Tree synced!")
