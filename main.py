@@ -118,8 +118,9 @@ def bind_ticket(channel: discord.TextChannel, group: str):
         elif group == "ADMIN":
             channel_overwrites = channel.overwrites
             mod_role = get(channel.guild.roles, id=int(MOD_ROLE_ID))
-            if mod_role and mod_role in channel_overwrites:
-                del channel_overwrites[mod_role]
+            if mod_role:
+                channel_overwrites[mod_role] = discord.PermissionOverwrite(read_messages=False, send_messages=False)
+
 
         asyncio.create_task(channel.edit(topic=new_topic, category=utilities.get_ticket_category(group), overwrites=channel_overwrites))
 
