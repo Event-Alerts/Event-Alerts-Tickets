@@ -148,7 +148,10 @@ def get_config(key=None):
     if key == None:
         return TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHANNEL_ID, TICKET_CATEGORY_ID, PING_ROLE, LOG_CHANNEL_ID, MUTED_ROLE_ID, ADMIN_TICKET_CATEGORY_ID, ADMIN_ROLE_ID
     else:
-        return config[key]
+        try:
+            return config[key]
+        except:
+            return False
 
 
 async def create_admin_ticket(client: discord.Client, username: str, memberid: int, reason: str) -> str:
@@ -168,14 +171,14 @@ async def create_admin_ticket(client: discord.Client, username: str, memberid: i
         guild.default_role: PermissionOverwrite(read_messages=False, send_messages=False),
         member: PermissionOverwrite(read_messages=True, send_messages=True),
         bot_member: PermissionOverwrite(read_messages=True, send_messages=True),
-        muted_role: PermissionOverwrite(
+        admin_role: PermissionOverwrite(read_messages=True, send_messages=True)
+    }
+    if (get_config("DO_MUTED_OVERWRITES")):
+        overwrites[muted_role] = PermissionOverwrite(
             use_application_commands=False,
             use_embedded_activities=False,
             use_external_apps=False
-        ),
-        admin_role: PermissionOverwrite(read_messages=True, send_messages=True)
-    }
-
+        )
     # Create the channel with the overwrites and topic
     channel = await category.create_text_channel(
         name=f"🟡a-{done_user}",
@@ -218,13 +221,14 @@ async def create_ticket(client: discord.Client, username: str, memberid: int, re
         guild.default_role: PermissionOverwrite(read_messages=False, send_messages=False),
         member: PermissionOverwrite(read_messages=True, send_messages=True),
         bot_member: PermissionOverwrite(read_messages=True, send_messages=True),
-        muted_role: PermissionOverwrite(
+        mod_role: PermissionOverwrite(read_messages=True, send_messages=True)
+    }
+    if (get_config("DO_MUTED_OVERWRITES")):
+        overwrites[muted_role] = PermissionOverwrite(
             use_application_commands=False,
             use_embedded_activities=False,
             use_external_apps=False
-        ),
-        mod_role: PermissionOverwrite(read_messages=True, send_messages=True)
-    }
+        )
 
     # Create the channel with topic and permissions
     channel = await category.create_text_channel(
