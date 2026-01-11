@@ -33,7 +33,7 @@ class CloseTicket(discord.ui.View):
     async def close_ticket_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await closeTicket(interaction)
 
-async def closeTicket(interaction: discord.Interaction, timer: int = 10):
+async def closeTicket(interaction: discord.Interaction, timer: int = 10, force: bool = False):
     channel_id = interaction.channel.id
 
     # Check if already scheduled for closure
@@ -48,7 +48,7 @@ async def closeTicket(interaction: discord.Interaction, timer: int = 10):
             "This button can only be used in ticket channels.", ephemeral=True
         )
         return
-    if (str(interaction.user.id) in interaction.channel.topic):
+    if (str(interaction.user.id) in interaction.channel.topic or force):
         await closeTicketCountdown(interaction, timer)
     else:
         await closeTicketRequest(interaction)

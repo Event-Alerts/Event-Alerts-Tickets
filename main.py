@@ -128,9 +128,9 @@ async def bind_ticket(channel: discord.TextChannel, group: str):
         await channel.edit(name=name, topic=new_topic, category=category, overwrites=channel_overwrites)
 
 @app_commands.command(description="Close the current ticket")
-@app_commands.describe(time="Time until closure (e.g., 10s, 5m, 1h, 7d). Default: 10 seconds")
-async def close(interaction: discord.Interaction, time: str = None):
-    await closeTicket(interaction, utilities.parse_time(time))
+@app_commands.describe(time="Time until closure (e.g., 10s, 5m, 1h, 7d). Default: 10 seconds", force="Time based closure (Default: False)")
+async def close(interaction: discord.Interaction, force: bool = False, time: str = None):
+    await closeTicket(interaction, utilities.parse_time(time), force)
 
 @app_commands.command(description="STAFF | Change the status of the current ticket")
 @app_commands.describe(status="The status of the current ticket")
