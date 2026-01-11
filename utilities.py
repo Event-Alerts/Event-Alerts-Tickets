@@ -137,23 +137,23 @@ def get_config(key=None):
         STORAGE_SERVER_ID = int(config["STORAGE_SERVER_ID"])
         STORAGE_CHANNEL_ID = int(config["STORAGE_CHANNEL_ID"])
         MOD_ROLE_ID = int(config["MOD_ROLE_ID"])
-        TRANSCRIPT_CHNL_ID = int(config["TRANSCRIPT_CHNL_ID"])
-        TICKET_CTGRY_ID = int(config["TICKET_CTGRY_ID"])
+        TRANSCRIPT_CHANNEL_ID = int(config["TRANSCRIPT_CHANNEL_ID"])
+        TICKET_CATEGORY_ID = int(config["TICKET_CATEGORY_ID"])
         PING_ROLE = int(config["PING_ROLE"])
-        LOG_CHNL_ID = int(config["LOG_CHNL_ID"])
+        LOG_CHANNEL_ID = int(config["LOG_CHANNEL_ID"])
         MUTED_ROLE_ID = int(config["MUTED_ROLE_ID"])
-        ADMIN_TICKET_CTGRY_ID = int(config["ADMIN_TICKET_CTGRY_ID"])
+        ADMIN_TICKET_CATEGORY_ID = int(config["ADMIN_TICKET_CATEGORY_ID"])
         ADMIN_ROLE_ID = int(config["ADMIN_ROLE_ID"])
     if key == None:
-        return TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID, ADMIN_TICKET_CTGRY_ID, ADMIN_ROLE_ID
+        return TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHANNEL_ID, TICKET_CATEGORY_ID, PING_ROLE, LOG_CHANNEL_ID, MUTED_ROLE_ID, ADMIN_TICKET_CATEGORY_ID, ADMIN_ROLE_ID
     else:
         return config[key]
 
 
 async def create_admin_ticket(client: discord.Client, username: str, memberid: int, reason: str) -> str:
-    TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID, ADMIN_TICKET_CTGRY_ID, ADMIN_ROLE_ID = get_config()
+    TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHANNEL_ID, TICKET_CATEGORY_ID, PING_ROLE, LOG_CHANNEL_ID, MUTED_ROLE_ID, ADMIN_TICKET_CATEGORY_ID, ADMIN_ROLE_ID = get_config()
     guild = await client.fetch_guild(SERVER_ID)
-    category: discord.CategoryChannel = await client.fetch_channel(ADMIN_TICKET_CTGRY_ID)
+    category: discord.CategoryChannel = await client.fetch_channel(ADMIN_TICKET_CATEGORY_ID)
     done_user = username.lower().replace(" ", "-")
     channel = await category.create_text_channel(name=f"🟡a-{done_user}")
     await channel.edit(topic=f"TICKET.admin-{str(memberid)}")
@@ -175,7 +175,7 @@ async def create_admin_ticket(client: discord.Client, username: str, memberid: i
                   icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
     from CloseTicket import CloseTicket
     await channel.send(content=f"<@{str(memberid)}> <@&{str(PING_ROLE)}>", embed=em, view=CloseTicket())
-    log_channel = client.get_channel(LOG_CHNL_ID)
+    log_channel = client.get_channel(LOG_CHANNEL_ID)
     em = discord.Embed(title="TICKET OPENED", color=discord.Color.green())
     em.add_field(name="Opener", value = f"<@{str(memberid)}>", inline=False)
     em.add_field(name="Channel", value = f"<#{str(channel.id)}>", inline=False)
@@ -190,9 +190,9 @@ async def create_admin_ticket(client: discord.Client, username: str, memberid: i
 
 
 async def create_ticket(client: discord.Client, username: str, memberid: int, reason: str) -> str:
-    TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID, ADMIN_TICKET_CTGRY_ID, ADMIN_ROLE_ID = get_config()
+    TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHANNEL_ID, TICKET_CATEGORY_ID, PING_ROLE, LOG_CHANNEL_ID, MUTED_ROLE_ID, ADMIN_TICKET_CATEGORY_ID, ADMIN_ROLE_ID = get_config()
     guild = await client.fetch_guild(SERVER_ID)
-    category: discord.CategoryChannel = await client.fetch_channel(TICKET_CTGRY_ID)
+    category: discord.CategoryChannel = await client.fetch_channel(TICKET_CATEGORY_ID)
     done_user = username.lower().replace(" ", "-")
     channel = await category.create_text_channel(name=f"🟡t-{done_user}")
     await channel.edit(topic=f"TICKET.ticket-{str(memberid)}")
@@ -214,7 +214,7 @@ async def create_ticket(client: discord.Client, username: str, memberid: int, re
                   icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
     from CloseTicket import CloseTicket
     await channel.send(content=f"<@{str(memberid)}> <@&{str(PING_ROLE)}>", embed=em, view=CloseTicket())
-    log_channel = client.get_channel(LOG_CHNL_ID)
+    log_channel = client.get_channel(LOG_CHANNEL_ID)
     em = discord.Embed(title="TICKET OPENED", color=discord.Color.green())
     em.add_field(name="Opener", value = f"<@{str(memberid)}>", inline=False)
     em.add_field(name="Channel", value = f"<#{str(channel.id)}>", inline=False)
@@ -228,7 +228,7 @@ async def create_ticket(client: discord.Client, username: str, memberid: int, re
     return str(channel.id)
 
 async def close_ticket(client, channel, user):
-    TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID, ADMIN_TICKET_CTGRY_ID, ADMIN_ROLE_ID = get_config()
+    TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHANNEL_ID, TICKET_CATEGORY_ID, PING_ROLE, LOG_CHANNEL_ID, MUTED_ROLE_ID, ADMIN_TICKET_CATEGORY_ID, ADMIN_ROLE_ID = get_config()
     storage_guild = await client.fetch_guild(STORAGE_SERVER_ID)
     storage_channel = await storage_guild.fetch_channel(STORAGE_CHANNEL_ID)
     voicechannels = channel.topic.split('-')[2:]
@@ -382,9 +382,9 @@ async def close_ticket(client, channel, user):
         html_transcript), filename=f"{channel.name}_transcript.html")
 
     #storage_message = await storage_channel.send(file=html_file)
-    transcript_channel = channel.guild.get_channel(TRANSCRIPT_CHNL_ID)
+    transcript_channel = channel.guild.get_channel(TRANSCRIPT_CHANNEL_ID)
     #url = storage_message.attachments[0].url
-    log_channel = client.get_channel(LOG_CHNL_ID)
+    log_channel = client.get_channel(LOG_CHANNEL_ID)
     em = discord.Embed(title="TICKET CLOSED", color=discord.Color.red())
     em.add_field(name="Closer", value = f"<@{str(user.id)}>", inline=False)
     em.add_field(name="Opener", value = f"<@{str(channel.topic.split('-')[1])}>", inline=False)
@@ -408,6 +408,6 @@ async def close_ticket(client, channel, user):
 
 def get_ticket_category(self, group: str) -> int:
     if group == "ADMIN":
-        return int(get_config("ADMIN_TICKET_CTGRY_ID"))
+        return int(get_config("ADMIN_TICKET_CATEGORY_ID"))
     else:
-        return int(get_config("TICKET_CTGRY_ID"))
+        return int(get_config("TICKET_CATEGORY_ID"))

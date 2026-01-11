@@ -29,8 +29,8 @@ class OpenView(discord.ui.View):
     @discord.ui.button(label="Open a support ticket", emoji="🎫", style=discord.ButtonStyle.gray, custom_id="ticket_button")
     async def ticket_button(self, interaction: discord.Interaction, button: discord.Button):
         # Check for existing tickets
-        TICKET_CTGRY_ID = utilities.get_config("TICKET_CTGRY_ID")
-        category = await interaction.client.fetch_channel(TICKET_CTGRY_ID)
+        TICKET_CATEGORY_ID = utilities.get_config("TICKET_CATEGORY_ID")
+        category = await interaction.client.fetch_channel(TICKET_CATEGORY_ID)
         user_tickets = []
         for channel in category.channels:
             try:
@@ -46,8 +46,8 @@ class OpenView(discord.ui.View):
     @discord.ui.button(label="Contact the Admins", emoji="⚠️", style=discord.ButtonStyle.red, custom_id="admin_button")
     async def admin_button(self, interaction: discord.Interaction, button: discord.Button):
         # Check for existing tickets
-        ADMIN_TICKET_CTGRY_ID = utilities.get_config("ADMIN_TICKET_CTGRY_ID")
-        category = await interaction.client.fetch_channel(ADMIN_TICKET_CTGRY_ID)
+        ADMIN_TICKET_CATEGORY_ID = utilities.get_config("ADMIN_TICKET_CATEGORY_ID")
+        category = await interaction.client.fetch_channel(ADMIN_TICKET_CATEGORY_ID)
         user_tickets = []
         for channel in category.channels:
             try:

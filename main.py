@@ -37,11 +37,11 @@ if not os.path.exists(f"{cwd}/config.json"):
     with open(f"{cwd}/config.json", "w") as f:
         json.dump({"TOKEN": "YOUR_TOKEN", "SERVER_ID": "YOUR_SERVER_ID",
                    "STORAGE_SERVER_ID": "YOUR_STORAGE_SERVER_ID", "STORAGE_CHANNEL_ID": "YOUR_STORAGE_CHANNEL_ID",
-                   "MOD_ROLE_ID": "YOUR_MOD_ROLE_ID", "TRANSCRIPT_CHNL_ID": "YOUR_TRANSCRIPT_CHNL_ID",
-                   "TICKET_CTGRY_ID": "YOUR_TICKET_CTGRY_ID", "PING_ROLE": "YOUR_PING_ROLE",
-                   "LOG_CHNL_ID": "YOUR_LOG_CHNL_ID", "MUTED_ROLE_ID": "MUTED_ROLE_ID"}, f)
+                   "MOD_ROLE_ID": "YOUR_MOD_ROLE_ID", "TRANSCRIPT_CHANNEL_ID": "YOUR_TRANSCRIPT_CHANNEL_ID",
+                   "TICKET_CATEGORY_ID": "YOUR_TICKET_CATEGORY_ID", "PING_ROLE": "YOUR_PING_ROLE",
+                   "LOG_CHANNEL_ID": "YOUR_LOG_CHANNEL_ID", "MUTED_ROLE_ID": "MUTED_ROLE_ID"}, f)
 
-TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHNL_ID, TICKET_CTGRY_ID, PING_ROLE, LOG_CHNL_ID, MUTED_ROLE_ID, ADMIN_TICKET_CTGRY_ID, ADMIN_ROLE_ID = utilities.get_config()
+TOKEN, SERVER_ID, STORAGE_SERVER_ID, STORAGE_CHANNEL_ID, MOD_ROLE_ID, TRANSCRIPT_CHANNEL_ID, TICKET_CATEGORY_ID, PING_ROLE, LOG_CHANNEL_ID, MUTED_ROLE_ID, ADMIN_TICKET_CATEGORY_ID, ADMIN_ROLE_ID = utilities.get_config()
 # SETUP
 intents = discord.Intents.all()
 activity = discord.Activity(
@@ -207,7 +207,7 @@ async def add(interaction: discord.Interaction, member: discord.Member):
             err = 1
         if err == 0:
             await interaction.followup.send(f"<:eaticketyes:1371503431356911818> Successfully added {member.mention} to the ticket!")
-            log_channel = client.get_channel(LOG_CHNL_ID)
+            log_channel = client.get_channel(LOG_CHANNEL_ID)
             em = discord.Embed(title="USER ADDED", color=discord.Color.dark_green())
             em.add_field(name="Opener", value = f"<@{str(interaction.channel.topic.split('-')[1])}>", inline=False)
             em.add_field(name="Adder", value = f"<@{str(interaction.user.id)}>", inline=False)
@@ -242,7 +242,7 @@ async def remove(interaction: discord.Interaction, member: discord.Member):
             err = 1
         if err == 0:
             await interaction.followup.send(f"<:eaticketyes:1371503431356911818> Successfully removed {member.mention} from the ticket!")
-            log_channel = client.get_channel(LOG_CHNL_ID)
+            log_channel = client.get_channel(LOG_CHANNEL_ID)
             em = discord.Embed(title="USER REMOVED", color=discord.Color.orange())
             em.add_field(name="Opener", value = f"<@{str(interaction.channel.topic.split('-')[1])}>", inline=False)
             em.add_field(name="Remover", value = f"<@{str(interaction.user.id)}>", inline=False)
