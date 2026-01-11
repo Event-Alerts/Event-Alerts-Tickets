@@ -64,9 +64,9 @@ async def on_ready():
     print("READY\n")
 
 
-@client.event
-async def on_message(message):
-    print(message)
+#@client.event
+#async def on_message(message):
+#   print(message)
 
 
 @app_commands.command(description="ADMIN | Send the ticket msg!")
