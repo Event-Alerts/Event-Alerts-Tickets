@@ -406,7 +406,7 @@ async def close_ticket(client, channel, user):
     # Close the ticket
     await channel.delete()
 
-def get_ticket_category(self, group: str) -> int:
+def get_ticket_category(group: str) -> int:
     if group == "ADMIN":
         return int(get_config("ADMIN_TICKET_CATEGORY_ID"))
     else:
