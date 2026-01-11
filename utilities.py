@@ -27,6 +27,7 @@ import re
 import mimetypes
 import io
 import json
+from discord import PermissionOverwrite
 
 # UTILITIES.PY
 def format_url(invite_url):
@@ -155,20 +156,32 @@ async def create_admin_ticket(client: discord.Client, username: str, memberid: i
     guild = await client.fetch_guild(SERVER_ID)
     category: discord.CategoryChannel = await client.fetch_channel(ADMIN_TICKET_CATEGORY_ID)
     done_user = username.lower().replace(" ", "-")
-    channel = await category.create_text_channel(name=f"🟡a-{done_user}")
-    await channel.edit(topic=f"TICKET.admin-{str(memberid)}")
-    # Set up permissions
-    await channel.set_permissions(guild.default_role, read_messages=False, send_messages=False)
-    # Allow the ticket creator to see and write in the channel
+  
+    # Fetch the relevant member and roles first
     member = await guild.fetch_member(memberid)
-    await channel.set_permissions(member, read_messages=True, send_messages=True)
-    # Allow the bot too
-    await channel.set_permissions(await guild.fetch_member(client.user.id), read_messages=True, send_messages=True)
-    # Dont Allow muted role to use / cmds
-    await channel.set_permissions(guild.get_role(MUTED_ROLE_ID), use_application_commands=False, use_embedded_activities=False, use_external_apps=False)
-    # Allow users with the admin role to see and write in the channel
+    bot_member = await guild.fetch_member(client.user.id)
     admin_role = guild.get_role(ADMIN_ROLE_ID)
-    await channel.set_permissions(admin_role, read_messages=True, send_messages=True)
+    muted_role = guild.get_role(MUTED_ROLE_ID)
+
+    # Prepare permission overwrites
+    overwrites = {
+        guild.default_role: PermissionOverwrite(read_messages=False, send_messages=False),
+        member: PermissionOverwrite(read_messages=True, send_messages=True),
+        bot_member: PermissionOverwrite(read_messages=True, send_messages=True),
+        muted_role: PermissionOverwrite(
+            use_application_commands=False,
+            use_embedded_activities=False,
+            use_external_apps=False
+        ),
+        admin_role: PermissionOverwrite(read_messages=True, send_messages=True)
+    }
+
+    # Create the channel with the overwrites and topic
+    channel = await category.create_text_channel(
+        name=f"🟡a-{done_user}",
+        topic=f"TICKET.admin-{memberid}",
+        overwrites=overwrites
+    )
     em = discord.Embed(
         title=f"Ticket - {username}", description=f"Hello {username}! Your ticket has been created!\n\n**__Information:__**\n**Ticket Reason:** ``{reason}``", color=discord.Color.from_str("#D49B08"))
     em.set_footer(text="Event Alerts | Tickets",

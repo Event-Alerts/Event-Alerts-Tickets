@@ -105,11 +105,14 @@ async def bind_ticket(channel: discord.TextChannel, group: str):
     # topic = TICKET.{group}-971316880243576862
     topic_parts = channel.topic.split('-')
     if len(topic_parts) >= 2:
-        topic_parts[0] = f"TICKET.{group}"
+        descriptor = "ticket" if not group == "ADMIN" else "admin"
+        topic_parts[0] = f"TICKET.{descriptor}"
         new_topic = '-'.join(topic_parts)
         # if from admin to staff add mod role id back
         # if from staff to admin remove mod role id
         # for channel overwrties
+        name = channel.name
+        name[1] = descriptor[0]
         if group == "STAFF":
             channel_overwrites = channel.overwrites
             mod_role = get(channel.guild.roles, id=int(MOD_ROLE_ID))
@@ -121,7 +124,7 @@ async def bind_ticket(channel: discord.TextChannel, group: str):
             if mod_role:
                 channel_overwrites[mod_role] = discord.PermissionOverwrite(read_messages=False, send_messages=False)
         category = discord.utils.get(channel.guild.categories, id=utilities.get_ticket_category(group))
-        await channel.edit(topic=new_topic, category=category, overwrites=channel_overwrites)
+        await channel.edit(name=name, topic=new_topic, category=category, overwrites=channel_overwrites)
 
 @app_commands.command(description="Close the current ticket")
 @app_commands.describe(time="Time until closure (e.g., 10s, 5m, 1h, 7d). Default: 10 seconds")
