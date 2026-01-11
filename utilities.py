@@ -405,3 +405,9 @@ async def close_ticket(client, channel, user):
     await transcript_channel.send(embed=em, file=html_file)
     # Close the ticket
     await channel.delete()
+
+def get_ticket_category(self, group: str) -> int:
+    if group == "ADMIN":
+        return int(get_config("ADMIN_TICKET_CTGRY_ID"))
+    else:
+        return int(get_config("TICKET_CTGRY_ID"))

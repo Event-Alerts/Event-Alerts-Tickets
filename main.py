@@ -84,6 +84,43 @@ async def ticketmsg(interaction: discord.Interaction, channel: discord.TextChann
     else:
         await interaction.response.send_message("No permission!", ephemeral=True)
 
+@app_commands.command(description="STAFF | Bind the ticket to another group")
+@app_commands.choices(group=[
+        app_commands.Choice(name="STAFF", value="STAFF"),
+        app_commands.Choice(name="ADMIN", value="ADMIN")
+    ])
+async def bind(interaction: discord.Interaction, group: app_commands.Choice[str]):
+    member = interaction.user
+    if get(member.roles, id=MOD_ROLE_ID) or member.id == 971316880243576862 or interaction.user.guild_permissions.administrator:
+        if "TICKET" not in interaction.channel.topic:
+            await interaction.response.send_message(embed=discord.Embed(description="This command can only be used in ticket channels.", color=discord.Color.red()), ephemeral=True)
+            bind_ticket(interaction.channel, group.value)
+            return
+        await interaction.response.send_message("**Successfully bound the ticket to group {group}!**".format(group=group.value), ephemeral=True)
+    else:
+        await interaction.response.send_message("No permission!", ephemeral=True)
+
+def bind_ticket(channel: discord.TextChannel, group: str):
+    # topic = TICKET.{group}-971316880243576862
+    topic_parts = channel.topic.split('-')
+    if len(topic_parts) >= 2:
+        topic_parts[0] = f"TICKET.{group}"
+        new_topic = '-'.join(topic_parts)
+        # if from admin to staff add mod role id back
+        # if from staff to admin remove mod role id
+        # for channel overwrties
+        if group == "STAFF":
+            channel_overwrites = channel.overwrites
+            mod_role = get(channel.guild.roles, id=int(MOD_ROLE_ID))
+            if mod_role:
+                channel_overwrites[mod_role] = discord.PermissionOverwrite(read_messages=True, send_messages=True)
+        elif group == "ADMIN":
+            channel_overwrites = channel.overwrites
+            mod_role = get(channel.guild.roles, id=int(MOD_ROLE_ID))
+            if mod_role and mod_role in channel_overwrites:
+                del channel_overwrites[mod_role]
+
+        asyncio.create_task(channel.edit(topic=new_topic, category=utilities.get_ticket_category(group), overwrites=channel_overwrites))
 
 @app_commands.command(description="Close the current ticket")
 @app_commands.describe(time="Time until closure (e.g., 10s, 5m, 1h, 7d). Default: 10 seconds")
@@ -290,6 +327,7 @@ tree.add_command(status)
 tree.add_command(add)
 tree.add_command(remove)
 tree.add_command(bump)
+tree.add_command(bind)
 tree.add_command(vc)
 
 # RUNNING
