@@ -120,7 +120,8 @@ async def bind_ticket(channel: discord.TextChannel, group: str):
             mod_role = get(channel.guild.roles, id=int(MOD_ROLE_ID))
             if mod_role:
                 channel_overwrites[mod_role] = discord.PermissionOverwrite(read_messages=False, send_messages=False)
-        await channel.edit(topic=new_topic, category=utilities.get_ticket_category(group), overwrites=channel_overwrites)
+        category = discord.utils.get(channel.guild.categories, id=utilities.get_ticket_category(group))
+        await channel.edit(topic=new_topic, category=category, overwrites=channel_overwrites)
 
 @app_commands.command(description="Close the current ticket")
 @app_commands.describe(time="Time until closure (e.g., 10s, 5m, 1h, 7d). Default: 10 seconds")
