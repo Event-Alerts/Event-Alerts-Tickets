@@ -27,7 +27,7 @@ class CancelButton(discord.ui.View):
         self.close_callback = close_callback  # Function to call for closing
         self.close_args = close_args or []    # Arguments for the close function
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="<:eaticketno:1371503463673892988>", custom_id="cancel_button")
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="<:vnnocleardark:1095912337162129418>", custom_id="cancel_button")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.cancelled = True
         for item in self.children:
@@ -41,7 +41,7 @@ class CancelButton(discord.ui.View):
         )
         self.stop()
 
-    @discord.ui.button(label="Close Now", style=discord.ButtonStyle.gray, emoji="<:eatickettrash:1371926108555055215>", custom_id="close_now_button")
+    @discord.ui.button(label="Close Now", style=discord.ButtonStyle.gray, emoji="<:vntrashclear:1095912428597948507>", custom_id="close_now_button")
     async def close_now(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.closed_now = True
         for item in self.children:
