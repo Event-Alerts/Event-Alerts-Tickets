@@ -113,7 +113,7 @@ async def bind_ticket(channel: discord.TextChannel, group: str):
         # if from staff to admin remove mod role id
         # for channel overwrties
         name = channel.name
-        name[1] = descriptor[0]
+        name = name[0] + descriptor[0] + name[2:]
         if group == "STAFF":
             channel_overwrites = channel.overwrites
             mod_role = get(channel.guild.roles, id=int(MOD_ROLE_ID))
