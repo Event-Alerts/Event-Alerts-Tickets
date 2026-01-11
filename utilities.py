@@ -381,9 +381,9 @@ async def close_ticket(client, channel, user):
     html_file = discord.File(io.StringIO(
         html_transcript), filename=f"{channel.name}_transcript.html")
 
-    storage_message = await storage_channel.send(file=html_file)
+    #storage_message = await storage_channel.send(file=html_file)
     transcript_channel = channel.guild.get_channel(TRANSCRIPT_CHNL_ID)
-    url = storage_message.attachments[0].url
+    #url = storage_message.attachments[0].url
     log_channel = client.get_channel(LOG_CHNL_ID)
     em = discord.Embed(title="TICKET CLOSED", color=discord.Color.red())
     em.add_field(name="Closer", value = f"<@{str(user.id)}>", inline=False)
@@ -394,7 +394,7 @@ async def close_ticket(client, channel, user):
     except:
         subject = "Unknown"
     em.add_field(name="Subject", value = f"``{subject}``", inline=False)
-    em.add_field(name="Transcript", value = f"[Click here]({url})", inline=False)
+    #em.add_field(name="Transcript", value = f"[Click here]({url})", inline=False)
     try:
         member = await transcript_channel.guild.fetch_member(int(channel.topic.split('-')[1]))
         em.set_thumbnail(url=member.avatar.url)
@@ -402,6 +402,6 @@ async def close_ticket(client, channel, user):
         pass
     em.set_footer(text="Event Alerts | Tickets", icon_url="https://cdn.discordapp.com/avatars/1142603508827299883/8115d0ff74451c2450da1f58733cf22d.png")
     await log_channel.send(embed=em)
-    await transcript_channel.send(embed=em)
+    await transcript_channel.send(embed=em, file=html_file)
     # Close the ticket
     await channel.delete()
