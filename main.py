@@ -96,12 +96,12 @@ async def bind(interaction: discord.Interaction, group: app_commands.Choice[str]
         if "TICKET" not in interaction.channel.topic:
             await interaction.response.send_message(embed=discord.Embed(description="This command can only be used in ticket channels.", color=discord.Color.red()), ephemeral=True)
             return
-        bind_ticket(interaction.channel, group.value)
+        await bind_ticket(interaction.channel, group.value)
         await interaction.response.send_message("**Successfully bound the ticket to group {group}!**".format(group=group.value), ephemeral=True)
     else:
         await interaction.response.send_message("No permission!", ephemeral=True)
 
-def bind_ticket(channel: discord.TextChannel, group: str):
+async def bind_ticket(channel: discord.TextChannel, group: str):
     # topic = TICKET.{group}-971316880243576862
     topic_parts = channel.topic.split('-')
     if len(topic_parts) >= 2:
@@ -120,9 +120,7 @@ def bind_ticket(channel: discord.TextChannel, group: str):
             mod_role = get(channel.guild.roles, id=int(MOD_ROLE_ID))
             if mod_role:
                 channel_overwrites[mod_role] = discord.PermissionOverwrite(read_messages=False, send_messages=False)
-
-
-        asyncio.create_task(channel.edit(topic=new_topic, category=utilities.get_ticket_category(group), overwrites=channel_overwrites))
+        await channel.edit(topic=new_topic, category=utilities.get_ticket_category(group), overwrites=channel_overwrites)
 
 @app_commands.command(description="Close the current ticket")
 @app_commands.describe(time="Time until closure (e.g., 10s, 5m, 1h, 7d). Default: 10 seconds")
