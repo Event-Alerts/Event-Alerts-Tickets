@@ -18,6 +18,7 @@
 # IMPORTS
 import os
 import sys
+import threading
 import discord
 import json
 from discord.utils import get
@@ -329,6 +330,22 @@ tree.add_command(remove)
 tree.add_command(bump)
 tree.add_command(bind)
 tree.add_command(vc)
+
+async def shutdown():
+    print("Closing Discord client...")
+    await client.close()
+
+# Stop listener
+def console_listener():
+    while True:
+        cmd = input().strip().lower()
+        if cmd == "stop":
+            print("Console stop received. Shutting down bot and system.")
+            asyncio.run_coroutine_threadsafe(shutdown(), client.loop)
+            break
+
+# Start console listener thread
+threading.Thread(target=console_listener, daemon=True).start()
 
 # RUNNING
 client.run(TOKEN)
