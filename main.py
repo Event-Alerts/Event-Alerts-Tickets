@@ -94,8 +94,8 @@ async def bind(interaction: discord.Interaction, group: app_commands.Choice[str]
     if get(member.roles, id=MOD_ROLE_ID) or member.id == 971316880243576862 or interaction.user.guild_permissions.administrator:
         if "TICKET" not in interaction.channel.topic:
             await interaction.response.send_message(embed=discord.Embed(description="This command can only be used in ticket channels.", color=discord.Color.red()), ephemeral=True)
-            bind_ticket(interaction.channel, group.value)
             return
+        bind_ticket(interaction.channel, group.value)
         await interaction.response.send_message("**Successfully bound the ticket to group {group}!**".format(group=group.value), ephemeral=True)
     else:
         await interaction.response.send_message("No permission!", ephemeral=True)
