@@ -130,42 +130,7 @@ async def bind_ticket(channel: discord.TextChannel, group: str):
 @app_commands.command(description="Close the current ticket")
 @app_commands.describe(time="Time until closure (e.g., 10s, 5m, 1h, 7d). Default: 10 seconds")
 async def close(interaction: discord.Interaction, time: str = None):
-    if "TICKET" not in interaction.channel.topic:
-        await interaction.response.send_message(embed=discord.Embed(description="This command can only be used in ticket channels.", color=discord.Color.red()), ephemeral=True)
-        return
-    # Check if already scheduled for closure
-    if interaction.channel.id in scheduled_closures:
-        await interaction.response.send_message(
-            "This ticket is already scheduled for closure.", ephemeral=True
-        )
-        return
-
-    if "TICKET" not in (interaction.channel.topic or ""):
-        await interaction.response.send_message(
-            "This button can only be used in ticket channels.", ephemeral=True
-        )
-        return
-    # Mark as scheduled for closure
-    scheduled_closures.add(interaction.channel.id)
-    seconds = utilities.parse_time(time)
-
-    view = CancelButton(close_callback=utilities.close_ticket, close_args=[interaction.client, interaction.channel, interaction.user])
-    embed = discord.Embed(
-        title="Ticket Closure",
-        description=f"This ticket will be closed in {seconds} seconds. Click ``Cancel`` to stop.",
-        color=discord.Color.red()
-    )
-    await interaction.response.send_message(embed=embed, view=view)
-
-    try:
-        await asyncio.wait_for(view.wait(), timeout=seconds)
-    except asyncio.TimeoutError:
-        if not view.cancelled:
-            await utilities.close_ticket(interaction.client, interaction.channel, interaction.user)
-    finally:
-        # Remove from scheduled closures regardless of outcome
-        scheduled_closures.discard(interaction.channel.id)
-
+    await closeTicket(interaction, utilities.parse_time(time))
 
 @app_commands.command(description="STAFF | Change the status of the current ticket")
 @app_commands.describe(status="The status of the current ticket")
