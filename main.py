@@ -61,6 +61,7 @@ async def on_ready():
     await tree.sync()
     print("Tree synced!")
     client.add_view(OpenView())
+    client.add_view(CloseTicket())
     print("Added start view!")
     print("READY\n")
 
